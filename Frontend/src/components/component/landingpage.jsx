@@ -1,78 +1,66 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import ImageSlider from "./slider/slider";
-export function Landingpage() {
-  const slides = [
-    "https://res.cloudinary.com/drikj5qcc/image/upload/v1709210144/cld-sample-2.jpg",
-    "https://res.cloudinary.com/drikj5qcc/image/upload/v1709210104/sample.jpg",
-    "https://res.cloudinary.com/drikj5qcc/image/upload/v1709210145/cld-sample-3.jpg",
-    "https://res.cloudinary.com/drikj5qcc/image/upload/v1709210146/cld-sample-5.jpg",
-  ];
+import { Sliders } from "./sliders";
 
+export function Landingpage() {
   return (
-    <div className="flex flex-col max-w-screen">
-      <header className="bg-muted py-4 px-4 md:px-6">
-        <div className="container flex items-center justify-between">
-          <Link to="/" className="flex items-center" prefetch={false}>
-            <FilmIcon className="h-6 w-6 mr-2" />
-            <span className="text-lg font-semibold">Cinescape</span>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <header className="bg-gradient-to-r from-blue-900 to-blue-500 py-6 px-4 md:px-8 shadow-md rounded-lg">
+        <div className="container mx-auto flex items-center justify-between">
+          <Link
+            to="/"
+            className="flex items-center text-white"
+            prefetch={false}
+          >
+            <FilmIcon className="h-8 w-8 mr-3" />
+            <span className="text-xl font-bold tracking-wide">Cinescape</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden md:flex items-center space-x-6">
             <Link
               to="/"
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
               prefetch={false}
             >
               Home
             </Link>
             <Link
               to="/"
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
               prefetch={false}
             >
               Showtimes
             </Link>
             <Link
               to="/"
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
               prefetch={false}
             >
               Experiences
             </Link>
             <Link
               to="/"
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
               prefetch={false}
             >
               Contact
             </Link>
           </nav>
-          <Button>Book Tickets</Button>
+          <Button className="bg-blue-50 text-black hover:bg-blue-800 transition-transform transform hover:scale-105 duration-300 shadow-lg rounded-full">
+            Book Tickets
+          </Button>
         </div>
       </header>
       <main className="flex-1">
-        <section className="relative h-[80vh] bg-[url('/hero-bg.jpg')] bg-cover bg-center">
-          <div className="absolute inset-0 border-4 h-[100px]">
+        {/* Centering Slider */}
+        <div className="flex justify-center items-center py-12">
+          <Sliders />
+        </div>
 
-            <ImageSlider autoslide={true}>{slides.map((s)=>(<img src={s}/>))} </ImageSlider>
-          </div>
-          {/* <div className="container h-full flex items-center justify-center">
-            <div className="text-center text-white space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold">
-                Elevate Your Movie Experience
-              </h1>
-              <p className="text-lg md:text-xl text-red-700">
-                Discover the ultimate in private movie theater luxury.
-              </p>
-              <Button className="text-blue-600">Book Tickets</Button>
-            </div>
-          </div> */}
-        </section>
-        <section className="py-12 md:py-24 bg-muted">
-          <div className="container">
+        <div className="py-12 md:py-24 bg-muted">
+          <div className="container mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
                 <PopcornIcon className="h-12 w-12 mb-4 text-primary" />
                 <h3 className="text-xl font-semibold mb-2">
                   Gourmet Concessions
@@ -82,7 +70,7 @@ export function Landingpage() {
                   elevate your movie-going experience.
                 </p>
               </div>
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
                 <TvIcon className="h-12 w-12 mb-4 text-primary" />
                 <h3 className="text-xl font-semibold mb-2">High-End A/V</h3>
                 <p className="text-muted-foreground">
@@ -90,7 +78,7 @@ export function Landingpage() {
                   state-of-the-art private screening rooms.
                 </p>
               </div>
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
                 <SofaIcon className="h-12 w-12 mb-4 text-primary" />
                 <h3 className="text-xl font-semibold mb-2">Luxury Seating</h3>
                 <p className="text-muted-foreground">
@@ -100,9 +88,9 @@ export function Landingpage() {
               </div>
             </div>
           </div>
-        </section>
-        <section className="py-12 md:py-24">
-          <div className="container">
+        </div>
+        <div className="py-12 md:py-24 bg-white">
+          <div className="container mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-2">
@@ -114,7 +102,7 @@ export function Landingpage() {
                 </p>
               </div>
               <Link
-                href="#"
+                to="#"
                 className="inline-flex items-center text-primary hover:underline"
                 prefetch={false}
               >
@@ -129,8 +117,8 @@ export function Landingpage() {
                   width={400}
                   height={600}
                   alt="Movie Poster"
-                  className="rounded-t-lg object-cover"
-                  style={{ aspectRatio: "400/600", objectFit: "cover" }}
+                  className="rounded-t-lg object-cover w-full"
+                  style={{ aspectRatio: "400/600" }}
                 />
                 <CardContent className="p-4">
                   <h3 className="text-xl font-semibold mb-2">Raayan</h3>
@@ -146,8 +134,8 @@ export function Landingpage() {
                   width={400}
                   height={600}
                   alt="Movie Poster"
-                  className="rounded-t-lg object-cover"
-                  style={{ aspectRatio: "400/600", objectFit: "cover" }}
+                  className="rounded-t-lg object-cover w-full"
+                  style={{ aspectRatio: "400/600" }}
                 />
                 <CardContent className="p-4">
                   <h3 className="text-xl font-semibold mb-2">Kalki 2898 AD</h3>
@@ -163,8 +151,8 @@ export function Landingpage() {
                   width={400}
                   height={600}
                   alt="Movie Poster"
-                  className="rounded-t-lg object-cover"
-                  style={{ aspectRatio: "400/600", objectFit: "cover" }}
+                  className="rounded-t-lg object-cover w-full"
+                  style={{ aspectRatio: "400/600" }}
                 />
                 <CardContent className="p-4">
                   <h3 className="text-xl font-semibold mb-2">Deadpool</h3>
@@ -176,10 +164,11 @@ export function Landingpage() {
               </Card>
             </div>
           </div>
-        </section>
+        </div>
       </main>
+
       <footer className="bg-muted py-6 px-4 md:px-6">
-        <div className="container flex flex-col md:flex-row items-center justify-between">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center">
             <FilmIcon className="h-6 w-6 mr-2" />
             <span className="text-lg font-semibold">Cinescape</span>

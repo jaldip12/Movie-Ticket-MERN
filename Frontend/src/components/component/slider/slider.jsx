@@ -1,38 +1,37 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BsChevronCompactLeft, BsChevronCompactRight } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
-const ImageSlider = ({ children: slides, autoslide = false, autoslideInterval = 3000 }) => {
-  const [curr, setCurr] = useState(0);
+const images = [
+  { url: 'https://res.cloudinary.com/drikj5qcc/image/upload/v1723209853/nzpygwhusukmvrqxhunn.jpg', alt: 'Image 1' },
+  { url: 'https://res.cloudinary.com/drikj5qcc/image/upload/v1723209881/ibwnilktuit8clfa1sus.jpg', alt: 'Image 2' },
+  { url: 'https://res.cloudinary.com/drikj5qcc/image/upload/v1723209883/gixijmlvgoy9becxdaju.jpg', alt: 'Image 3' },
+];
 
-  const prev = () => {
-    setCurr((curr) => (curr === 0 ? slides.length - 1 : curr - 1));
+const ImageSlider = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  let autoslide = true;
+  let autoslideInterval = 3000;
+
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
   };
 
-  const next = () => {
-    setCurr((curr) => (curr === slides.length - 1 ? 0 : curr + 1));
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
-
-  useEffect(() => {
-    if (!autoslide) return;
-    const slideInterval = setInterval(next, autoslideInterval);
-    return () => clearInterval(slideInterval);
-  }, [autoslide, autoslideInterval]);
 
   return (
-    <div className="overflow-hidden relative">
-      <div
-        className="flex transition-transform ease-out duration-500"
-        style={{ transform: `translateX(-${curr * 100}%)` }}
-      >
-        {slides}
+    <div className="overflow-hidden bg-auto relative h-[600px] max-w-[1800px] group">
+      <img
+        src={images[currentIndex].url}
+        alt={images[currentIndex].alt}
+        className="w-full h-full object-cover"
+      />
+      <div className="hidden group-hover:block absolute top-[50%] -translate-x-0 translate-y-[50%] left-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer">
+        <BsChevronCompactLeft onClick={handlePrevious} size={22} />
       </div>
-      <div className="absolute inset-0 flex items-center justify-between p-4">
-        <button onClick={prev} className="p-1 rounded-full shadow bg-white text-gray-800 hover:bg-gray-300">
-          <ChevronLeft />
-        </button>
-        <button onClick={next} className="p-1 rounded-full shadow bg-white text-gray-800 hover:bg-gray-300">
-          <ChevronRight />
-        </button>
+      <div className="hidden group-hover:block absolute top-[50%] -translate-x-0 translate-y-[50%] right-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer">
+        <BsChevronCompactRight onClick={handleNext} size={22} />
       </div>
     </div>
   );
