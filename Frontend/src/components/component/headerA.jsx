@@ -14,25 +14,25 @@ export function HeaderA() {
   return (
     <nav className="w-full flex items-center gap-2 font-semibold">
       
-      <section className="sticky top-0 z-10 w-full flex h-16 items-center justify-between border-b bg-gradient-to-r from-blue-500 to-teal-500 px-6 shadow-lg">
-      <Link to="/" className="flex items-center gap-2">
-        <FilmIcon className="h-6 w-6" />
-        <div className='w-100'>Movie Tickets</div>
-      </Link>
-        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+      <section className="sticky top-0 z-10 w-full flex h-16 items-center justify-between bg-gradient-to-r from-blue-900 to-blue-800 px-6 shadow-lg">
+        <Link to="/" className="flex items-center gap-2 text-white transition-transform hover:scale-105">
+          <FilmIcon className="h-7 w-7 text-red-500 animate-pulse" />
+          <div className='w-100 text-xl font-bold'>Movie Tickets</div>
+        </Link>
+        <h1 className="text-2xl font-bold text-white text-shadow">Admin Dashboard</h1>
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-white">
+              <Button variant="outline" className="text-white border-red-500 hover:bg-red-600 hover:text-white transition-colors duration-300">
                 Menu
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Options</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuContent className="bg-blue-800 rounded-md overflow-hidden">
+              <DropdownMenuLabel className="text-white px-3 py-2 bg-red-600">Options</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-red-500" />
+              <DropdownMenuItem className="text-white hover:bg-red-600 transition-colors duration-200 px-3 py-2">Profile</DropdownMenuItem>
+              <DropdownMenuItem className="text-white hover:bg-red-600 transition-colors duration-200 px-3 py-2">Settings</DropdownMenuItem>
+              <DropdownMenuItem className="text-white hover:bg-red-600 transition-colors duration-200 px-3 py-2">Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

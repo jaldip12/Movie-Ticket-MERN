@@ -5,196 +5,123 @@ import { Sliders } from "./sliders";
 
 export function Landingpage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-gradient-to-r from-blue-900 to-blue-500 py-6 px-4 md:px-8 shadow-md rounded-lg">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
+      <header className="bg-gradient-to-r from-indigo-900 to-purple-700 py-8 px-6 md:px-10 shadow-xl">
         <div className="container mx-auto flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center text-white"
+            className="flex items-center text-white transition-transform hover:scale-105 duration-300"
             prefetch={false}
           >
-            <FilmIcon className="h-8 w-8 mr-3" />
-            <span className="text-xl font-bold tracking-wide">Cinescape</span>
+            <FilmIcon className="h-10 w-10 mr-3 text-yellow-400" />
+            <span className="text-2xl font-extrabold tracking-wider">Cinescape</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
-              prefetch={false}
-            >
-              Home
-            </Link>
-            <Link
-              to="/"
-              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
-              prefetch={false}
-            >
-              Showtimes
-            </Link>
-            <Link
-              to="/"
-              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
-              prefetch={false}
-            >
-              Experiences
-            </Link>
-            <Link
-              to="/"
-              className="text-sm font-medium text-white hover:text-black transition-transform transform hover:scale-105 duration-300"
-              prefetch={false}
-            >
-              Contact
-            </Link>
+          <nav className="hidden md:flex items-center space-x-8">
+            {["Home", "Showtimes", "Experiences", "Contact"].map((item) => (
+              <Link
+                key={item}
+                to="/"
+                className="text-sm font-medium text-white hover:text-yellow-400 transition-all transform hover:scale-110 duration-300"
+                prefetch={false}
+              >
+                {item}
+              </Link>
+            ))}
           </nav>
-          <Button className="bg-blue-50 text-black hover:bg-blue-800 transition-transform transform hover:scale-105 duration-300 shadow-lg rounded-full">
-            Book Tickets
+          <Button className="bg-yellow-400 text-indigo-900 hover:bg-yellow-500 transition-all transform hover:scale-105 duration-300 shadow-lg rounded-full font-bold px-6 py-2">
+            Book Now
           </Button>
         </div>
       </header>
       <main className="flex-1">
-        {/* Centering Slider */}
-        <div className="flex justify-center items-center py-12">
+        <div className="container mx-auto py-16">
           <Sliders />
         </div>
 
-        <div className="py-12 md:py-24 bg-muted">
+        <div className="py-16 md:py-24 bg-white">
           <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
-                <PopcornIcon className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-semibold mb-2">
-                  Gourmet Concessions
-                </h3>
-                <p className="text-muted-foreground">
-                  Indulge in our selection of premium snacks and beverages to
-                  elevate your movie-going experience.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
-                <TvIcon className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-semibold mb-2">High-End A/V</h3>
-                <p className="text-muted-foreground">
-                  Enjoy breathtaking visuals and immersive sound in our
-                  state-of-the-art private screening rooms.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg hover:border hover:border-primary hover:scale-105 transition duration-300">
-                <SofaIcon className="h-12 w-12 mb-4 text-primary" />
-                <h3 className="text-xl font-semibold mb-2">Luxury Seating</h3>
-                <p className="text-muted-foreground">
-                  Sink into our plush, comfortable seating and enjoy the
-                  ultimate in movie-watching bliss.
-                </p>
-              </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-indigo-900">Experience the Magic</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {[
+                { icon: PopcornIcon, title: "Gourmet Concessions", description: "Indulge in premium snacks and beverages." },
+                { icon: TvIcon, title: "Cutting-Edge A/V", description: "Immerse yourself in state-of-the-art visuals and sound." },
+                { icon: SofaIcon, title: "Luxurious Comfort", description: "Relax in our plush, ergonomic seating." },
+              ].map((feature, index) => (
+                <div key={index} className="flex flex-col items-center text-center p-8 bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition duration-300">
+                  <feature.icon className="h-16 w-16 mb-6 text-purple-600" />
+                  <h3 className="text-2xl font-semibold mb-4 text-indigo-900">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        <div className="py-12 md:py-24 bg-white">
+        <div className="py-16 md:py-24 bg-gradient-to-r from-indigo-100 to-purple-100">
           <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                  Upcoming Showtimes
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-indigo-900">
+                  Now Showing
                 </h2>
-                <p className="text-muted-foreground">
-                  Check out our latest movie offerings and book your tickets
-                  today.
+                <p className="text-xl text-gray-600">
+                  Discover our latest cinematic offerings
                 </p>
               </div>
               <Link
                 to="#"
-                className="inline-flex items-center text-primary hover:underline"
+                className="inline-flex items-center text-purple-600 hover:text-purple-800 text-lg font-semibold mt-6 md:mt-0"
                 prefetch={false}
               >
                 View All Showtimes
-                <ChevronRightIcon className="ml-2 h-4 w-4" />
+                <ChevronRightIcon className="ml-2 h-5 w-5" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <img
-                  src=""
-                  width={400}
-                  height={600}
-                  alt="Movie Poster"
-                  className="rounded-t-lg object-cover w-full"
-                  style={{ aspectRatio: "400/600" }}
-                />
-                <CardContent className="p-4">
-                  <h3 className="text-xl font-semibold mb-2">Raayan</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Showtimes: 7:00 PM, 9:30 PM
-                  </p>
-                  <Button>Book Tickets</Button>
-                </CardContent>
-              </Card>
-              <Card>
-                <img
-                  src=""
-                  width={400}
-                  height={600}
-                  alt="Movie Poster"
-                  className="rounded-t-lg object-cover w-full"
-                  style={{ aspectRatio: "400/600" }}
-                />
-                <CardContent className="p-4">
-                  <h3 className="text-xl font-semibold mb-2">Kalki 2898 AD</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Showtimes: 6:30 PM, 9:00 PM
-                  </p>
-                  <Button>Book Tickets</Button>
-                </CardContent>
-              </Card>
-              <Card>
-                <img
-                  src=""
-                  width={400}
-                  height={600}
-                  alt="Movie Poster"
-                  className="rounded-t-lg object-cover w-full"
-                  style={{ aspectRatio: "400/600" }}
-                />
-                <CardContent className="p-4">
-                  <h3 className="text-xl font-semibold mb-2">Deadpool</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Showtimes: 8:00 PM
-                  </p>
-                  <Button>Book Tickets</Button>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {[
+                { title: "Raayan", times: "7:00 PM, 9:30 PM" },
+                { title: "Kalki 2898 AD", times: "6:30 PM, 9:00 PM" },
+                { title: "Deadpool", times: "8:00 PM" },
+              ].map((movie, index) => (
+                <Card key={index} className="overflow-hidden transition-all hover:shadow-2xl hover:scale-105 duration-300">
+                  <img
+                    src={`https://source.unsplash.com/random/400x600?movie,${index}`}
+                    width={400}
+                    height={600}
+                    alt={`${movie.title} Poster`}
+                    className="w-full object-cover"
+                    style={{ aspectRatio: "2/3" }}
+                  />
+                  <CardContent className="p-6 bg-gradient-to-b from-gray-50 to-gray-100">
+                    <h3 className="text-2xl font-bold mb-3 text-indigo-900">{movie.title}</h3>
+                    <p className="text-gray-600 mb-4">
+                      Showtimes: {movie.times}
+                    </p>
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-lg transition-colors duration-300">Book Tickets</Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="bg-muted py-6 px-4 md:px-6">
+      <footer className="bg-indigo-900 text-white py-10 px-6">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center">
-            <FilmIcon className="h-6 w-6 mr-2" />
-            <span className="text-lg font-semibold">Cinescape</span>
+          <div className="flex items-center mb-6 md:mb-0">
+            <FilmIcon className="h-8 w-8 mr-3 text-yellow-400" />
+            <span className="text-2xl font-bold">Cinescape</span>
           </div>
-          <nav className="flex items-center space-x-4 mt-4 md:mt-0">
-            <Link
-              to="/"
-              className="text-sm font-medium hover:underline"
-              prefetch={false}
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/"
-              className="text-sm font-medium hover:underline"
-              prefetch={false}
-            >
-              Terms of Service
-            </Link>
-            <Link
-              to="/"
-              className="text-sm font-medium hover:underline"
-              prefetch={false}
-            >
-              Contact Us
-            </Link>
+          <nav className="flex flex-wrap justify-center md:justify-end space-x-6">
+            {["Privacy Policy", "Terms of Service", "Contact Us"].map((item) => (
+              <Link
+                key={item}
+                to="/"
+                className="text-sm font-medium hover:text-yellow-400 transition-colors duration-300"
+                prefetch={false}
+              >
+                {item}
+              </Link>
+            ))}
           </nav>
         </div>
       </footer>
