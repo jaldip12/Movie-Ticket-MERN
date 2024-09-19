@@ -1,37 +1,49 @@
+import React from 'react';
 import { Sliders } from "./sliders";
+import { motion } from 'framer-motion';
+
+const features = [
+  {
+    icon: PopcornIcon,
+    title: "Gourmet Concessions",
+    description: "Indulge in premium snacks and artisanal beverages.",
+  },
+  {
+    icon: TvIcon,
+    title: "Cutting-Edge A/V",
+    description: "Immerse yourself in state-of-the-art 4K visuals and Dolby Atmos sound.",
+  },
+  {
+    icon: SofaIcon,
+    title: "Luxurious Comfort",
+    description: "Relax in our plush, ergonomic reclining seats with ample legroom.",
+  },
+];
+
 export function Landingpage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-50 to-blue-100">
+    <div className="flex flex-col min-h-screen ">
       <main className="flex-1">
-        <div className="container mx-auto py-16">
+        <div className="container mx-auto py-16 ">
           <Sliders />
         </div>
-        <div className="py-16 md:py-24 bg-white">
-          <div className="container mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-blue-900">
-              Experience the Magic
-            </h2>
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl font-bold text-center mb-12 text-blue-900"
+            >
+              Experience the Magic of Cinema
+            </motion.h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {[
-                {
-                  icon: PopcornIcon,
-                  title: "Gourmet Concessions",
-                  description: "Indulge in premium snacks and beverages.",
-                },
-                {
-                  icon: TvIcon,
-                  title: "Cutting-Edge A/V",
-                  description:
-                    "Immerse yourself in state-of-the-art visuals and sound.",
-                },
-                {
-                  icon: SofaIcon,
-                  title: "Luxurious Comfort",
-                  description: "Relax in our plush, ergonomic seating.",
-                },
-              ].map((feature, index) => (
-                <div
+              {features.map((feature, index) => (
+                <motion.div
                   key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
                   className="flex flex-col items-center text-center p-8 bg-gradient-to-b from-blue-50 to-blue-100 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition duration-300"
                 >
                   <feature.icon className="h-16 w-16 mb-6 text-blue-600" />
@@ -39,15 +51,16 @@ export function Landingpage() {
                     {feature.title}
                   </h3>
                   <p className="text-gray-600">{feature.description}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
 }
+
 function ChevronRightIcon(props) {
   return (
     <svg
@@ -66,7 +79,6 @@ function ChevronRightIcon(props) {
     </svg>
   );
 }
-
 
 function FilmIcon(props) {
   return (
