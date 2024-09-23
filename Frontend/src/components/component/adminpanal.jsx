@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from "react-router-dom";
 import {
   DropdownMenu,
@@ -15,78 +16,117 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-// import {
-//   CalendarIcon,
-//   DollarSignIcon,
-//   FilmIcon,
-//   LayoutGridIcon,
-//   MapPinIcon,
-//   MoveHorizontalIcon,
-//   ShoppingCartIcon,
-//   UsersIcon,
-// } from "@/components/icons"; // Assuming you have these icons in the same place
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  FilmIcon,
+  LayoutGridIcon,
+  MapPinIcon,
+  MoveHorizontalIcon,
+  ShoppingCartIcon,
+  UsersIcon,
+  SettingsIcon,
+  LogOutIcon,
+  SearchIcon,
+} from "lucide-react";
+import { motion } from 'framer-motion';
 
 export function AdminPanel() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       {/* Sidebar */}
-      <aside className="w-60 border-r bg-background">
-        <div className="h-14 flex items-center justify-center border-b">
-          <h1 className="text-xl font-semibold">Admin Panel</h1>
+      <aside className="w-64 bg-gray-800 shadow-lg">
+        <div className="h-16 flex items-center justify-center border-b border-gray-700">
+          <h1 className="text-2xl font-bold text-yellow-400">cinépolis</h1>
         </div>
         <nav className="p-4">
           {[
             { icon: LayoutGridIcon, label: "Dashboard", path: "/admin" },
-            { icon: FilmIcon, label: "Movies", path: "/seating" },
+            { icon: FilmIcon, label: "Movies", path: "/movies" },
             { icon: MapPinIcon, label: "Theaters", path: "/theaters" },
             { icon: CalendarIcon, label: "Bookings", path: "/bookings" },
             { icon: UsersIcon, label: "Users", path: "/users" },
+            { icon: SettingsIcon, label: "Settings", path: "/settings" },
           ].map(({ icon: Icon, label, path }) => (
             <Link
               key={label}
               to={path}
-              className="flex items-center gap-3 p-3 rounded-md text-muted-foreground hover:bg-muted transition"
+              className="flex items-center gap-3 p-3 rounded-md text-gray-300 hover:text-yellow-400 hover:bg-gray-700 transition-all duration-300"
             >
               <Icon className="h-5 w-5" />
               <span>{label}</span>
             </Link>
           ))}
         </nav>
+        <div className="absolute bottom-0 w-64 p-4">
+          <Button variant="outline" className="w-full flex items-center justify-center gap-2 bg-gray-700 text-gray-300 hover:text-yellow-400 hover:bg-gray-600 transition-colors duration-300">
+            <LogOutIcon className="h-4 w-4" />
+            <span>Log out</span>
+          </Button>
+        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
-        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <main className="flex-1 p-8 overflow-y-auto">
+        <div className="flex justify-between items-center mb-8">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-bold text-yellow-400"
+          >
+            Dashboard
+          </motion.h2>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="bg-gray-700 text-white pl-10 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+        <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           {[
-            { label: "Total Bookings", value: "12,345", icon: ShoppingCartIcon },
-            { label: "Total Revenue", value: "$123,456", icon: DollarSignIcon },
-            { label: "New Users", value: "1,234", icon: UsersIcon },
-            { label: "Upcoming Shows", value: "78", icon: CalendarIcon },
-          ].map(({ label, value, icon: Icon }) => (
-            <Card key={label}>
-              <CardHeader className="flex justify-between items-center">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {label}
-                </div>
-                <Icon className="h-5 w-5" />
-              </CardHeader>
-              <CardContent className="text-2xl font-semibold">{value}</CardContent>
-            </Card>
+            { label: "Total Bookings", value: "12,345", icon: ShoppingCartIcon, color: "bg-blue-600" },
+            { label: "Total Revenue", value: "$123,456", icon: DollarSignIcon, color: "bg-green-600" },
+            { label: "New Users", value: "1,234", icon: UsersIcon, color: "bg-yellow-600" },
+            { label: "Upcoming Shows", value: "78", icon: CalendarIcon, color: "bg-purple-600" },
+          ].map(({ label, value, icon: Icon, color }, index) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+            >
+              <Card className="hover:shadow-lg transition-shadow bg-gray-700 text-white border-none">
+                <CardHeader className={`flex justify-between items-center ${color} rounded-t-lg py-3`}>
+                  <div className="text-sm font-medium">{label}</div>
+                  <Icon className="h-6 w-6" />
+                </CardHeader>
+                <CardContent className="text-2xl font-bold pt-4">{value}</CardContent>
+              </Card>
+            </motion.div>
           ))}
         </section>
 
         {/* Movies Table */}
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold">Movies</h2>
-          <div className="mt-4 border rounded-lg">
+        <motion.section 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-yellow-400">Recent Movies</h2>
+          <Card className="bg-gray-700 text-white border-none overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Genre</TableHead>
-                  <TableHead>Release Date</TableHead>
-                  <TableHead>Show Timings</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-gray-300">Title</TableHead>
+                  <TableHead className="text-gray-300">Genre</TableHead>
+                  <TableHead className="text-gray-300">Release Date</TableHead>
+                  <TableHead className="text-gray-300">Show Timings</TableHead>
+                  <TableHead className="text-right text-gray-300">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -97,8 +137,20 @@ export function AdminPanel() {
                     date: "April 26, 2019",
                     timings: "10:00 AM, 2:00 PM, 6:00 PM",
                   },
+                  {
+                    title: "The Shawshank Redemption",
+                    genre: "Drama",
+                    date: "September 22, 1994",
+                    timings: "1:00 PM, 4:30 PM, 8:00 PM",
+                  },
+                  {
+                    title: "Inception",
+                    genre: "Action, Adventure, Sci-Fi",
+                    date: "July 16, 2010",
+                    timings: "11:30 AM, 3:00 PM, 7:30 PM",
+                  },
                 ].map(({ title, genre, date, timings }) => (
-                  <TableRow key={title}>
+                  <TableRow key={title} className="hover:bg-gray-600 transition-colors duration-200">
                     <TableCell className="font-medium">{title}</TableCell>
                     <TableCell>{genre}</TableCell>
                     <TableCell>{date}</TableCell>
@@ -106,14 +158,14 @@ export function AdminPanel() {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-yellow-400">
                             <MoveHorizontalIcon className="h-4 w-4" />
                             <span className="sr-only">Actions</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="bg-gray-700 text-white">
+                          <DropdownMenuItem className="hover:bg-gray-600 hover:text-yellow-400">Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="hover:bg-gray-600 hover:text-yellow-400">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -121,221 +173,35 @@ export function AdminPanel() {
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </section>
+          </Card>
+        </motion.section>
 
-        {/* Theaters Table */}
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold">Theaters</h2>
-          <div className="mt-4 border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Seating Capacity</TableHead>
-                  <TableHead>Show Schedules</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Downtown Cinema</TableCell>
-                  <TableCell>500</TableCell>
-                  <TableCell>10:00 AM - 12:00 PM, 2:00 PM - 4:00 PM, 6:00 PM - 8:00 PM</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoveHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+        {/* Theaters Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          <h2 className="text-2xl font-semibold mb-4 text-yellow-400">Top Theaters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { name: "Cinépolis VIP", location: "Ahmedabad", capacity: 150 },
+              { name: "INOX Megaplex", location: "Mumbai", capacity: 200 },
+              { name: "PVR Directors Cut", location: "Delhi", capacity: 180 },
+            ].map((theater, index) => (
+              <Card key={index} className="bg-gray-700 text-white border-none hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <h3 className="text-xl font-semibold text-yellow-400">{theater.name}</h3>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-300">Location: {theater.location}</p>
+                  <p className="text-gray-300">Capacity: {theater.capacity} seats</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </section>
+        </motion.section>
       </main>
     </div>
-  );
-}
-
-function CalendarIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  );
-}
-
-function DollarSignIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="12" x2="12" y1="2" y2="22" />
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  );
-}
-
-function FilmIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="18" height="18" x="3" y="3" rx="2" />
-      <path d="M7 3v18" />
-      <path d="M3 7.5h4" />
-      <path d="M3 12h18" />
-      <path d="M3 16.5h4" />
-      <path d="M17 3v18" />
-      <path d="M17 7.5h4" />
-      <path d="M17 16.5h4" />
-    </svg>
-  );
-}
-
-function LayoutGridIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="7" height="7" x="3" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="14" rx="1" />
-      <rect width="7" height="7" x="3" y="14" rx="1" />
-    </svg>
-  );
-}
-
-function MapPinIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function MoveHorizontalIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="18 8 22 12 18 16" />
-      <polyline points="6 8 2 12 6 16" />
-      <line x1="2" x2="22" y1="12" y2="12" />
-    </svg>
-  );
-}
-
-function ShoppingCartIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="21" r="1" />
-      <circle cx="19" cy="21" r="1" />
-      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-    </svg>
-  );
-}
-
-function UsersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
   );
 }

@@ -22,18 +22,18 @@ const features = [
 
 export function Landingpage() {
   return (
-    <div className="flex flex-col min-h-screen ">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <main className="flex-1">
-        <div className="container mx-auto py-16 ">
+        <div className="container mx-auto py-16">
           <Sliders />
         </div>
-        <section className="py-16 md:py-24 bg-white">
+        <section className="py-16 md:py-24 bg-gray-800">
           <div className="container mx-auto px-4">
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold text-center mb-12 text-blue-900"
+              transition={{ duration: 0.4 }}
+              className="text-4xl md:text-5xl font-bold text-center mb-12 text-yellow-400"
             >
               Experience the Magic of Cinema
             </motion.h2>
@@ -43,14 +43,24 @@ export function Landingpage() {
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  className="flex flex-col items-center text-center p-8 bg-gradient-to-b from-blue-50 to-blue-100 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition duration-300"
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.03, 
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    backgroundColor: "#4a5568" // darker shade on hover
+                  }}
+                  className="flex flex-col items-center text-center p-8 bg-gray-700 rounded-xl shadow-lg transition duration-200"
                 >
-                  <feature.icon className="h-16 w-16 mb-6 text-blue-600" />
-                  <h3 className="text-2xl font-semibold mb-4 text-blue-900">
+                  <motion.div
+                    whileHover={{ rotate: 180 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <feature.icon className="h-16 w-16 mb-6 text-yellow-400" />
+                  </motion.div>
+                  <h3 className="text-2xl font-semibold mb-4 text-white">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-gray-300">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -120,7 +130,7 @@ function PopcornIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4" />
+      <path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4" />
       <path d="M10 22 9 8" />
       <path d="m14 22 1-14" />
       <path d="M20 8c.5 0 .9.4.8 1l-2.6 12c-.1.5-.7 1-1.2 1H7c-.6 0-1.1-.4-1.2-1L3.2 9c-.1-.6.3-1 .8-1Z" />

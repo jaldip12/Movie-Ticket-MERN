@@ -1,91 +1,92 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-hot-toast";
+import { FaSquare, FaWheelchair } from "react-icons/fa";
 
-// Seat Component
-const Seat = React.memo(({ id, isSelected, isAvailable, onSelect }) => {
-  const seatLabel = id.split("-")[3]; // Extract seat label for display
+const Seat = React.memo(({ id, isSelected, isAvailable, onSelect, price, isAccessible }) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`w-8 h-8 m-1 text-xs font-semibold rounded transition-all duration-300 transform shadow-md ${
+      isAvailable
+        ? isSelected
+          ? "bg-black text-white border-2 border-black shadow-lg"
+          : "bg-white text-black hover:bg-gray-200 hover:text-black border border-black"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
+    }`}
+    onClick={() => isAvailable && onSelect(id)}
+    disabled={!isAvailable}
+    title={`Seat ${id.split("-")[3]} - ${isAvailable ? `Available ($${price})` : "Unavailable"}`}
+  >
+    {isAccessible ? <FaWheelchair /> : <FaSquare />}
+  </motion.button>
+));
 
-  return (
-    <button
-      className={`w-8 h-8 m-1 text-[12px] font-semibold rounded-full transition-all duration-300 ${
-        isAvailable
-          ? isSelected
-            ? "bg-black text-white border-2 border-black transform scale-105"
-            : "bg-white hover:bg-gray-200 hover:scale-105 border border-black"
-          : "bg-gray-300 cursor-not-allowed opacity-60"
-      }`}
-      onClick={() => isAvailable && onSelect(id)}
-      disabled={!isAvailable}
-      title={`Seat ${seatLabel} - ${isAvailable ? "Available" : "Unavailable"}`}
-    >
-      {seatLabel}
-    </button>
-  );
-});
-
-// Row Component
-const Row = React.memo(({ sectionId, rowId, seats, selectedSeats, onSeatSelect }) => {
-  return (
-    <div className="flex items-center mb-3">
-      <span className="w-8 text-sm font-bold mr-3 text-black">{rowId}</span>
-      <div className="flex-1">
-        <div className="flex justify-start">
-          {seats.map((seat) => (
-            <Seat
-              key={seat.id}
-              id={seat.id}
-              isSelected={selectedSeats.includes(seat.id)}
-              isAvailable={seat.isAvailable}
-              onSelect={onSeatSelect}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-});
-
-// Section Component
-const Section = React.memo(({ sectionId, rows, selectedSeats, onSeatSelect, isActive }) => {
-  return (
-    <div
-      className={`mb-8 p-6 border-2 rounded-xl shadow-md transition-all duration-300 ${
-        isActive ? "border-black bg-gray-100" : "border-gray-300 hover:border-black"
-      }`}
-    >
-      <h3 className="text-xl font-semibold mb-4 text-black">{sectionId}</h3>
-      {Object.entries(rows).map(([rowId, seats]) => (
-        <Row
-          key={rowId}
-          sectionId={sectionId}
-          rowId={rowId}
-          seats={seats}
-          selectedSeats={selectedSeats}
-          onSeatSelect={onSeatSelect}
+const Row = React.memo(({ rowId, seats, selectedSeats, onSeatSelect }) => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5 }}
+    className="flex items-center mb-2"
+  >
+    <span className="w-8 text-sm font-bold mr-2 text-black">{rowId}</span>
+    <div className="flex">
+      {seats.map((seat) => (
+        <Seat
+          key={seat.id}
+          id={seat.id}
+          isSelected={selectedSeats.includes(seat.id)}
+          isAvailable={seat.isAvailable}
+          onSelect={onSeatSelect}
+          price={seat.price}
+          isAccessible={seat.isAccessible}
         />
       ))}
     </div>
-  );
-});
+  </motion.div>
+));
 
-// Screen Component
+const Section = React.memo(({ sectionId, rows, selectedSeats, onSeatSelect, isActive }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className={`mb-8 p-6 rounded-xl shadow-md transition-all duration-300 ${isActive ? "border-2 border-black bg-gray-50" : "border border-gray-300 hover:border-black"}`}
+  >
+    <h3 className="text-xl font-semibold mb-4 text-black text-center">{sectionId}</h3>
+    <AnimatePresence>
+      {Object.entries(rows).map(([rowId, seats]) => (
+        <Row key={rowId} rowId={rowId} seats={seats} selectedSeats={selectedSeats} onSeatSelect={onSeatSelect} />
+      ))}
+    </AnimatePresence>
+  </motion.div>
+));
+
 const Screen = () => (
-  <div className="w-full h-12 bg-gray-300 text-black text-sm rounded-t-2xl flex items-center justify-center mb-10 shadow-lg">
-    Screen
-  </div>
+  <motion.div
+    initial={{ opacity: 0, scale: 0.5 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.5 }}
+    className="w-full h-16 bg-gradient-to-r from-gray-300 to-gray-400 text-black text-sm rounded-t-3xl flex items-center justify-center mb-10 shadow-lg"
+  >
+    <span className="text-lg font-bold">Screen</span>
+  </motion.div>
 );
 
-// Legend Component
 const Legend = () => (
   <div className="flex justify-center space-x-6 mb-6">
     {[
-      { className: "bg-black border-black", label: "Selected" },
-      { className: "bg-white border-black", label: "Available" },
-      { className: "bg-gray-300 border-gray-400 opacity-60", label: "Unavailable" },
-    ].map((legendItem) => (
-      <div className="flex items-center" key={legendItem.label}>
-        <div className={`w-8 h-8 ${legendItem.className} rounded-full mr-2 border`}></div>
-        <span className="text-black">{legendItem.label}</span>
+      { className: "bg-black text-white", label: "Selected", icon: <FaSquare /> },
+      { className: "bg-white text-black border-black", label: "Available", icon: <FaSquare /> },
+      { className: "bg-gray-300 text-gray-500 opacity-50", label: "Unavailable", icon: <FaSquare /> },
+      { className: "bg-white text-black border-black", label: "Accessible", icon: <FaWheelchair /> },
+    ].map(({ className, label, icon }) => (
+      <div className="flex items-center" key={label}>
+        <div className={`w-8 h-8 ${className} rounded mr-2 border flex items-center justify-center`}>
+          {icon}
+        </div>
+        <span className="text-black">{label}</span>
       </div>
     ))}
   </div>
@@ -99,34 +100,43 @@ export function Seating() {
   const [newRowName, setNewRowName] = useState("");
   const [newSeatCount, setNewSeatCount] = useState("");
   const [seatPrice, setSeatPrice] = useState("");
+  const [isAccessible, setIsAccessible] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const newTotalPrice = selectedSeats.reduce((sum, id) => {
+      const [section, row] = id.split('-');
+      return sum + layout[section][row].find(seat => seat.id === id).price;
+    }, 0);
+    setTotalPrice(newTotalPrice);
+  }, [selectedSeats, layout]);
 
   const handleSeatSelect = useCallback((seatId) => {
-    setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((id) => id !== seatId)
-        : [...prev, seatId]
-    );
-  }, []);
+    setSelectedSeats(prev => {
+      const newSelection = prev.includes(seatId) 
+        ? prev.filter(id => id !== seatId) 
+        : [...prev, seatId];
+      
+      toast.success(`Updated selection. Total: $${totalPrice.toFixed(2)}`);
+      return newSelection;
+    });
+  }, [layout, totalPrice]);
 
-  const addRow = () => {
+  const addRow = useCallback(() => {
     if (!currentSection || !newRowName || !newSeatCount || !seatPrice) {
-      alert("Please fill in all fields before adding a row.");
+      toast.error("Please fill in all fields before adding a row.");
       return;
     }
 
     const seatCount = parseInt(newSeatCount, 10);
     const price = parseFloat(seatPrice);
 
-    if (isNaN(seatCount) || seatCount <= 0 || seatCount > 50) {
-      alert("Please enter a valid number of seats (1-50)");
-      return;
-    }
-    if (isNaN(price) || price <= 0) {
-      alert("Please enter a valid price");
+    if (isNaN(seatCount) || seatCount <= 0 || seatCount > 50 || isNaN(price) || price <= 0) {
+      toast.error("Please enter valid seat count (1-50) and price.");
       return;
     }
 
-    setLayout((prev) => ({
+    setLayout(prev => ({
       ...prev,
       [currentSection]: {
         ...prev[currentSection],
@@ -134,6 +144,7 @@ export function Seating() {
           id: `${currentSection}-${newRowName}-seat-${i + 1}`,
           isAvailable: true,
           price: price,
+          isAccessible: isAccessible && i < Math.ceil(seatCount * 0.1), // Make 10% of seats accessible
         })),
       },
     }));
@@ -141,37 +152,61 @@ export function Seating() {
     setNewRowName("");
     setNewSeatCount("");
     setSeatPrice("");
-  };
+    setIsAccessible(false);
+    toast.success("Row added successfully!");
+  }, [currentSection, newRowName, newSeatCount, seatPrice, isAccessible]);
 
-  const addSection = () => {
+  const addSection = useCallback(() => {
     if (!newSectionName.trim()) {
-      alert("Please enter a section name.");
+      toast.error("Please enter a section name.");
       return;
     }
-
-    setLayout((prev) => ({
-      ...prev,
-      [newSectionName]: {},
-    }));
+    setLayout(prev => ({ ...prev, [newSectionName]: {} }));
     setCurrentSection(newSectionName);
     setNewSectionName("");
-  };
+    toast.success("Section added successfully!");
+  }, [newSectionName]);
 
-  const generateLayout = () => {
+  const generateLayout = useCallback(() => {
     if (window.confirm("Are you sure you want to clear the layout?")) {
       setLayout({});
       setSelectedSeats([]);
       setCurrentSection("");
+      toast.success("Layout cleared successfully!");
     }
-  };
+  }, []);
+
+  const layoutSections = useMemo(() => (
+    Object.entries(layout).map(([sectionId, rows]) => (
+      <Section
+        key={sectionId}
+        sectionId={sectionId}
+        rows={rows}
+        selectedSeats={selectedSeats}
+        onSeatSelect={handleSeatSelect}
+        isActive={currentSection === sectionId}
+      />
+    ))
+  ), [layout, selectedSeats, handleSeatSelect, currentSection]);
 
   return (
     <div className="max-w-6xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
-      <h1 className="text-3xl font-bold mb-8 text-center text-black">Cinema Seating Arrangement</h1>
+      <motion.h1 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-4xl font-bold mb-8 text-center text-black"
+      >
+        Cinema Seating Arrangement
+      </motion.h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-        {/* Section Adding */}
-        <div className="bg-gray-100 p-6 rounded-xl shadow-md">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-50 p-6 rounded-xl shadow-md"
+        >
           <h2 className="text-xl font-semibold mb-4 text-black">Add New Section</h2>
           <input
             type="text"
@@ -180,16 +215,17 @@ export function Seating() {
             onChange={(e) => setNewSectionName(e.target.value)}
             className="w-full p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300"
           />
-          <Button
-            onClick={addSection}
-            className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-          >
+          <Button onClick={addSection} className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
             Add Section
           </Button>
-        </div>
+        </motion.div>
 
-        {/* Row Adding */}
-        <div className="bg-gray-100 p-6 rounded-xl shadow-md">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-50 p-6 rounded-xl shadow-md"
+        >
           <h2 className="text-xl font-semibold mb-4 text-black">Add New Row</h2>
           <select
             value={currentSection}
@@ -198,9 +234,7 @@ export function Seating() {
           >
             <option value="">Select Section</option>
             {Object.keys(layout).map((section) => (
-              <option key={section} value={section}>
-                {section}
-              </option>
+              <option key={section} value={section}>{section}</option>
             ))}
           </select>
           <div className="grid grid-cols-3 gap-4">
@@ -226,49 +260,43 @@ export function Seating() {
               className="p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300"
             />
           </div>
-          <Button
-            onClick={addRow}
-            className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-          >
+          <div className="flex items-center mt-4">
+            <input
+              type="checkbox"
+              id="isAccessible"
+              checked={isAccessible}
+              onChange={(e) => setIsAccessible(e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="isAccessible">Include Accessible Seats</label>
+          </div>
+          <Button onClick={addRow} className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
             Add Row
           </Button>
-        </div>
+        </motion.div>
       </div>
 
-      <Button
-        onClick={generateLayout}
-        className="mb-8 w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300"
-      >
+      <Button onClick={generateLayout} className="mb-8 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
         Clear Layout
       </Button>
 
-      {/* Legend */}
       <Legend />
 
-      {/* Layout Display */}
-      <div className="bg-gray-100 p-8 rounded-2xl shadow-lg">
+      <div className="bg-gray-50 p-8 rounded-2xl shadow-lg">
         <Screen />
-        <div className="overflow-x-auto">
-          {Object.entries(layout).map(([sectionId, rows]) => (
-            <Section
-              key={sectionId}
-              sectionId={sectionId}
-              rows={rows}
-              selectedSeats={selectedSeats}
-              onSeatSelect={handleSeatSelect}
-              isActive={currentSection === sectionId}
-            />
-          ))}
-        </div>
+        <div className="overflow-x-auto">{layoutSections}</div>
       </div>
 
-      {/* Selected Seats */}
-      <div className="mt-8 bg-gray-100 p-6 rounded-xl shadow-md">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mt-8 bg-gray-50 p-6 rounded-xl shadow-md"
+      >
         <h2 className="text-2xl font-bold mb-4 text-black">Selected Seats:</h2>
-        <p className="text-lg text-black">
-          {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
-        </p>
-      </div>
+        <p className="text-lg text-black">{selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}</p>
+        <p className="text-xl font-bold mt-4 text-black">Total Price: ${totalPrice.toFixed(2)}</p>
+      </motion.div>
     </div>
   );
 }

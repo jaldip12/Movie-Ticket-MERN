@@ -5,72 +5,62 @@ import {
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { FilmIcon, UserIcon, SettingsIcon, LogOutIcon } from 'lucide-react';
 
 export function HeaderA() {
     return (
-        <nav className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg sticky top-0 z-50">
-            {/* Logo Section */}
-            <Link to="/" className="flex items-center gap-3 text-white hover:scale-105 transition-transform duration-200">
-                <FilmIcon className="h-8 w-8 text-red-500 animate-pulse" />
-                <span className="text-2xl font-extrabold tracking-wide">Movie Tickets</span>
-            </Link>
+        <header className="bg-gray-800 py-4 shadow-lg sticky top-0 z-50">
+            <div className="container mx-auto flex items-center justify-between px-4">
+                {/* Logo */}
+                <Link
+                    to="/"
+                    className="flex items-center text-yellow-400 transition-transform hover:scale-105 duration-300"
+                    prefetch={false}
+                >
+                    <FilmIcon className="h-8 w-8 mr-2" />
+                    <span className="text-3xl font-bold tracking-wider">cinépolis</span>
+                </Link>
 
-            {/* Page Title */}
-            <h1 className="text-xl md:text-2xl font-bold text-white">Admin Dashboard</h1>
+                {/* Page Title */}
+                <h1 className="text-2xl font-bold text-yellow-400">Admin Dashboard</h1>
 
-            {/* Dropdown Menu */}
-            <div className="flex items-center gap-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-800 transition-colors">
-                            Menu
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-blue-800 border border-blue-700 rounded-md shadow-md">
-                        <DropdownMenuLabel className="text-white bg-red-600 px-3 py-2">Options</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-red-500" />
-                        <DropdownMenuItem className="text-white hover:bg-red-600 px-4 py-2 cursor-pointer transition-colors">
-                            Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-white hover:bg-red-600 px-4 py-2 cursor-pointer transition-colors">
-                            Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-white hover:bg-red-600 px-4 py-2 cursor-pointer transition-colors">
-                            Logout
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {/* Dropdown Menu */}
+                <div className="flex items-center space-x-4">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="bg-gray-700 text-gray-300 hover:text-yellow-400 hover:bg-gray-600 transition-colors duration-300 flex items-center space-x-2 rounded-full px-4 py-2">
+                                <UserIcon className="h-5 w-5" />
+                                <span>Admin</span>
+                                <svg
+                                    className="w-4 h-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-gray-800 text-white border border-gray-700 rounded-xl shadow-lg overflow-hidden">
+                            <DropdownMenuItem className="hover:bg-gray-700 hover:text-yellow-400 flex items-center px-4 py-3 transition-colors duration-200">
+                                <UserIcon className="mr-3 h-5 w-5" />
+                                Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-gray-700 hover:text-yellow-400 flex items-center px-4 py-3 transition-colors duration-200">
+                                <SettingsIcon className="mr-3 h-5 w-5" />
+                                Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="hover:bg-gray-700 hover:text-yellow-400 flex items-center px-4 py-3 transition-colors duration-200">
+                                <LogOutIcon className="mr-3 h-5 w-5" />
+                                Logout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
-        </nav>
-    );
-}
-
-function FilmIcon(props) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <rect width="18" height="18" x="3" y="3" rx="2" />
-            <path d="M7 3v18" />
-            <path d="M3 7.5h4" />
-            <path d="M3 12h18" />
-            <path d="M3 16.5h4" />
-            <path d="M17 3v18" />
-            <path d="M17 7.5h4" />
-            <path d="M17 16.5h4" />
-        </svg>
+        </header>
     );
 }
