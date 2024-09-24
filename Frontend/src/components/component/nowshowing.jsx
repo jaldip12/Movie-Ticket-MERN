@@ -35,7 +35,7 @@ const movies = [
   {
     id: 3,
     title: "35 (2024)",
-    poster: "/placeholder.svg?height=600&width=400",
+    poster: "https://res.cloudinary.com/drikj5qcc/image/upload/v1727194934/uibt8s0vxa1uxi7lzgnv.svg",
     rating: 9.1,
     votes: "9.3K",
     certification: "U",

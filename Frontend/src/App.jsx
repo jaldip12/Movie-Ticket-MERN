@@ -10,6 +10,7 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Seat from "./pages/Seats";
 import Seats2 from "./pages/Seats2";
+import Tickets from "./pages/Tickets";
 function App() {
   return (
     <>
@@ -20,7 +21,7 @@ function App() {
           <Route path="/signup" element={<Signup/>} />
           <Route path="/admin" element={<Seat/>} />
           <Route path="/seating" element={<Seats2/>} />
-
+          <Route path="/tickets" element={<Tickets/>} />
         </Routes>
       </Router>
     </>
