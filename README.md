@@ -81,9 +81,6 @@ This project is a comprehensive Movie Management System for Cinépolis, featurin
 7. Open your browser and visit `http://localhost:5173` to view the application.
 
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
 ## 📞 Contact
 For any queries or support, please contact:
 
