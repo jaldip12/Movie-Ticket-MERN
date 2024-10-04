@@ -1,6 +1,6 @@
 import React from 'react'
-import {Seating} from "../components/seatingCreation/seating"
-import {HeaderA} from "../components/Headers/headerA"
+import {Seating} from "../components/seatingCreation/Seating"
+import {HeaderA} from "../components/Headers/HeaderA"
 function Seats2() {
   return (
     <div>

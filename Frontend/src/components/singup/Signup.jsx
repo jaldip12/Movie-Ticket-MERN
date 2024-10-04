@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 
-export function Sigup() {
+export default function Sigup() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <motion.div 

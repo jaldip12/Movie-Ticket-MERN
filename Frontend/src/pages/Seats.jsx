@@ -1,6 +1,6 @@
 import React from 'react'
-import {HeaderA} from "../components/Headers/headerA"
-import { AdminPanel } from '../components/Admin/adminpanal'
+import {HeaderA} from "../components/Headers/HeaderA"
+import { AdminPanel } from '../components/Admin/AdminPanel'
 function Seat() {
   return (
     <div>

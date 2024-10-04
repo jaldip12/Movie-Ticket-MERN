@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 
-export function Log() {
+export default function Login() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <motion.div 

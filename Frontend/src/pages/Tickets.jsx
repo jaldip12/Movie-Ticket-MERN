@@ -1,7 +1,7 @@
 import React from 'react'
-import {TicketBooking} from "../components/ticketBooking/tickets"
- import { AddMoviePage } from "../components/addmovie/addmovie"
- import { HeaderA } from '@/components/Headers/headerA' 
+import {TicketBooking} from "../components/ticketBooking/TicketBooking"
+ import { AddMoviePage } from "../components/addmovie/AddMovie"
+ import { HeaderA } from '@/components/Headers/HeaderA' 
 function Tickets() {
   return (
    
