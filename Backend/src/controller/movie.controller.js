@@ -27,4 +27,22 @@ const addmovie = asyncHandler(async (req, res) => {
     res.status(201).json(new ApiResponse(201, movie, "Movie added successfully"));
 });
 
-export { addmovie };
+const getmovies = asyncHandler(async (req, res) => {
+    const movies = await Movie.find({}).limit(4);
+    
+    if (!movies || movies.length === 0) {
+        return res.status(404).json(new ApiResponse(404, null, "No movies found"));
+    }
+
+    res.status(200).json(new ApiResponse(200, movies, "Movies retrieved successfully"));
+});
+
+const getallmovies = asyncHandler(async (req, res) => {
+    const movies = await Movie.find({});
+    if (!movies || movies.length === 0) {
+        return res.status(404).json(new ApiResponse(404, null, "No movies found"));
+    }
+    res.status(200).json(new ApiResponse(200, movies, "Movies retrieved successfully"));
+});
+
+export { addmovie,getmovies,getallmovies };

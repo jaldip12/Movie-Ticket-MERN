@@ -1,64 +1,33 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Star, Film, Heart } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-
-const movies = [
-  {
-    id: 1,
-    title: "Kalki 2898 AD",
-    poster: "https://res.cloudinary.com/drikj5qcc/image/upload/v1726403508/kalki.jpg",
-    rating: 9.2,
-    votes: "24.6K",
-    certification: "UA",
-    language: "Hindi",
-    genre: "Action",
-    releaseDate: "2024-03-15",
-    duration: "3h 04min",
-  },
-  {
-    id: 2,
-    title: "Deadpool",
-    poster: "https://res.cloudinary.com/drikj5qcc/image/upload/v1726403508/deadpool.jpg",
-    rating: 9.0,
-    votes: "95.7K",
-    certification: "UA",
-    language: "English",
-    genre: "Drama",
-    releaseDate: "2024-02-28",
-    duration: "2h 15min",
-  },
-  {
-    id: 3,
-    title: "35 (2024)",
-    poster: "https://res.cloudinary.com/drikj5qcc/image/upload/v1727194934/uibt8s0vxa1uxi7lzgnv.svg",
-    rating: 9.1,
-    votes: "9.3K",
-    certification: "U",
-    language: "Telugu, Tamil, Malayalam",
-    genre: "Comedy",
-    releaseDate: "2024-01-10",
-    duration: "2h 5min",
-  },
-  {
-    id: 4,
-    title: "Stree 2: Sarkate Ka Aatank",
-    poster: "https://res.cloudinary.com/drikj5qcc/image/upload/v1726403508/stree2.jpg",
-    rating: 8.9,
-    votes: "368.1K",
-    certification: "UA",
-    language: "Hindi",
-    genre: "Horror",
-    releaseDate: "2024-04-05",
-    duration: "2h 20min",
-  },
-]
+import axios from "axios"
 
 export function NowShowing() {
+  const [movies, setMovies] = useState([])
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/v1/movies/getmovies")
+        if (response.data.statusCode === 200) {
+          setMovies(response.data.data)
+        } else {
+          console.error("Failed to fetch movies:", response.data.message)
+        }
+      } catch (error) {
+        console.error("Error fetching movies:", error)
+      }
+    }
+
+    fetchMovies()
+  }, [])
+
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-800 py-16">
       <div className="container mx-auto px-4">
@@ -72,7 +41,7 @@ export function NowShowing() {
           transition={{ duration: 0.5 }}
         >
           {movies.map((movie, index) => (
-            <MovieCard key={movie.id} movie={movie} index={index} />
+            <MovieCard key={movie._id} movie={movie} index={index} />
           ))}
         </motion.div>
       </div>

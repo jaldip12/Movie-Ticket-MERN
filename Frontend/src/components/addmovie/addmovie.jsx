@@ -27,7 +27,7 @@ const GENRES = [
   { label: 'Documentary', value: 'Documentary' }
 ];
 
-const CERTIFICATIONS = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+const CERTIFICATIONS = ['U', 'UA', 'A', 'S'];
 
 const initialMovieData = {
   title: '',
@@ -141,7 +141,7 @@ export function AddMoviePage() {
     });
 
     try {
-      await axios.post('/api/movies', { ...movieData, genres: selectedGenres });
+      await axios.post('http://localhost:8000/api/v1/movies/addmovie', { ...movieData, genres: selectedGenres });
       setLoading(false);
       toast.success(`Movie "${movieData.title}" has been successfully added.`);
       setMovieData(initialMovieData);

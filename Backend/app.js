@@ -7,7 +7,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: "*", // Allow access from everywhere
     credentials: true,
   })
 );

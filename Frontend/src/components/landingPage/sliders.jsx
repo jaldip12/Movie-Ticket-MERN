@@ -4,7 +4,7 @@ import { BsChevronCompactLeft, BsChevronCompactRight } from "react-icons/bs";
 export function Sliders() {
   const images = [
     {
-      url: "https://res.cloudinary.com/drikj5qcc/image/upload/v1724692994/i03yipvsh3jvfrf10cmt.jpg",
+      url: "https://res.cloudinary.com/drikj5qcc/image/upload/v1727971425/devra.avif",
       alt: "Image 1",
     },
     {

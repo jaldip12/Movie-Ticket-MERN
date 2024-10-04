@@ -1,8 +1,8 @@
 import React from 'react'
-import { Landingpage } from '@/components/component/landingpage'
-import { Header } from '@/components/component/header'
-import { Footer } from '@/components/component/footer'
-import { NowShowing } from '@/components/component/nowshowing'
+import { Landingpage } from '../components/landingPage/landingpage'
+import { Header } from '../components/Headers/header'
+import { Footer } from '../components/Footer/footer'
+import { NowShowing } from '../components/nowshowing/nowshowing'
 function Home() {
   return (
     <div>
