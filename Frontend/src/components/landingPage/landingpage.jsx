@@ -24,7 +24,7 @@ export function Landingpage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <main className="flex-1">
-        <div className="container mx-auto py-16">
+        <div className="container mx-auto py-16 flex justify-center">
           <Sliders />
         </div>
         <section className="py-16 md:py-24 bg-gray-800">

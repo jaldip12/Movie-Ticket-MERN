@@ -48,9 +48,10 @@ export function Sliders() {
     <section className="w-full bg-blue-1200">
       <div className="container mx-auto px-4 relative">
         <div 
-          className="relative w-full overflow-hidden rounded-lg shadow-xl"
+          className="relative w-full overflow-hidden rounded-xl shadow-xl"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          style={{ width: '1020px', height: '240px' }}
         >
           <div
             className="flex transition-transform duration-700 ease-in-out"
@@ -64,8 +65,9 @@ export function Sliders() {
                 <img
                   src={image.url}
                   alt={image.alt}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-xl"
                   loading="lazy"
+                  style={{ width: '1020px', height: '240px' }}
                 />
               </div>
             ))}

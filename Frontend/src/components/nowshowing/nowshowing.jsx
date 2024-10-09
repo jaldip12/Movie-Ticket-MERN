@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 export function NowShowing() {
   const [movies, setMovies] = useState([])
@@ -51,6 +52,11 @@ export function NowShowing() {
 
 function MovieCard({ movie, index }) {
   const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate(`/Movies/${encodeURIComponent(movie.title)}`);
+  };
 
   return (
     <motion.div
@@ -94,7 +100,10 @@ function MovieCard({ movie, index }) {
               {movie.language}
             </Badge>
           </div>
-          <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md">
+          <Button 
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md"
+            onClick={handleBookNow}
+          >
             <Film className="w-4 h-4 mr-2" />
             Book Now
           </Button>
