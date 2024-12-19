@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 const features = [
   {
     icon: PopcornIcon,
-    title: "Gourmet Concessions",
+    title: "Gourmet Concessions", 
     description: "Indulge in premium snacks and artisanal beverages.",
   },
   {
@@ -18,13 +18,18 @@ const features = [
     title: "Luxurious Comfort",
     description: "Relax in our plush, ergonomic reclining seats with ample legroom.",
   },
+  {
+    icon: FilmIcon,
+    title: "Curated Selection",
+    description: "Enjoy a diverse range of critically acclaimed films and exclusive premieres.",
+  },
 ];
 
 export function Landingpage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <main className="flex-1">
-        <div className="container mx-auto py-16 flex justify-center">
+        <div className="container mx-auto py-16 flex items-center justify-center">
           <Sliders />
         </div>
         <section className="py-16 md:py-24 bg-gray-800">
@@ -32,30 +37,31 @@ export function Landingpage() {
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl font-bold text-center mb-12 text-yellow-400"
             >
               Experience the Magic of Cinema
             </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ 
-                    scale: 1.03, 
-                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: "#4a5568" // darker shade on hover
+                    scale: 1.05, 
+                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
+                    backgroundColor: "#4a5568"
                   }}
-                  className="flex flex-col items-center text-center p-8 bg-gray-700 rounded-xl shadow-lg transition duration-200"
+                  className="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg transition duration-300 ease-in-out"
                 >
                   <motion.div
-                    whileHover={{ rotate: 180 }}
-                    transition={{ duration: 0.3 }}
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-6"
                   >
-                    <feature.icon className="h-16 w-16 mb-6 text-yellow-400" />
+                    <feature.icon className="h-16 w-16 text-yellow-400" />
                   </motion.div>
                   <h3 className="text-2xl font-semibold mb-4 text-white">
                     {feature.title}

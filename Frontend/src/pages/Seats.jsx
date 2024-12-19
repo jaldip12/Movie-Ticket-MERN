@@ -1,14 +1,13 @@
 import React from 'react'
-import {HeaderA} from "../components/Headers/HeaderA"
-import { AdminPanel } from '../components/Admin/AdminPanel'
-function Seat() {
+import Seating from "../components/seatingCreation/Seating"
+
+function Seats() {
   return (
     <div>
-    <HeaderA/>
-    <AdminPanel/>
       
+      <Seating/>
     </div>
   )
 }
 
-export default Seat
+export default Seats

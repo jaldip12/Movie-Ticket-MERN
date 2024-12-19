@@ -45,10 +45,10 @@ export function Sliders() {
   const handleMouseLeave = () => setIsAutoSliding(true);
 
   return (
-    <section className="w-full bg-blue-1200">
-      <div className="container mx-auto px-4 relative">
+    <section className="w-full bg-blue-1200 flex justify-center items-center">
+      <div className="container mx-auto px-4 relative flex justify-center">
         <div 
-          className="relative w-full overflow-hidden rounded-xl shadow-xl"
+          className="relative overflow-hidden rounded-xl shadow-xl"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{ width: '1020px', height: '240px' }}

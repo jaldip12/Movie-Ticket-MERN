@@ -1,291 +1,380 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { FaSquare } from "react-icons/fa";
+import { 
+  FaChair, 
+  FaTrash, 
+  FaEdit, 
+  FaPlus, 
+  FaSave
+} from "react-icons/fa";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
 
-const Seat = React.memo(({ id, isSelected, isAvailable, onSelect, price }) => (
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    className={`w-8 h-8 m-1 text-xs font-semibold rounded transition-all duration-300 transform shadow-md ${
-      isAvailable
-        ? isSelected
-          ? "bg-black text-white border-2 border-black shadow-lg"
-          : "bg-white text-black hover:bg-gray-200 hover:text-black border border-black"
-        : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
-    }`}
-    onClick={() => isAvailable && onSelect(id)}
-    disabled={!isAvailable}
-    title={`Seat ${id.split("-")[3]} - ${isAvailable ? `Available ($${price})` : "Unavailable"}`}
-  >
-    <FaSquare />
-  </motion.button>
-));
+// Constants
+const MAX_SEATS_PER_ROW = 40;
+const MAX_SECTIONS = 10;
+const MAX_ROWS_PER_SECTION = 20;
 
-const Row = React.memo(({ rowId, seats, selectedSeats, onSeatSelect }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.5 }}
-    className="flex items-center mb-2"
-  >
-    <span className="w-8 text-sm font-bold mr-2 text-black">{rowId}</span>
-    <div className="flex">
-      {seats.map((seat) => (
-        <Seat
-          key={seat.id}
-          id={seat.id}
-          isSelected={selectedSeats.includes(seat.id)}
-          isAvailable={seat.isAvailable}
-          onSelect={onSeatSelect}
-          price={seat.price}
-        />
-      ))}
+// Seat Component
+const Seat = React.memo(({ 
+  id, 
+  price, 
+  isDisabled,
+  seatNumber 
+}) => {
+  const getStatusColor = () => {
+    if (isDisabled) return "bg-gray-300 text-gray-500";
+    return "bg-white text-gray-800";
+  };
+
+  return (
+    <div
+      className={`w-10 h-10 m-1 rounded-lg
+                  flex items-center justify-center relative
+                  border-2 ${getStatusColor()}`}
+      title={`Seat ${seatNumber} - Price: $${price.toFixed(2)}`}
+    >
+      <FaChair className="w-6 h-6" />
+      <span className="absolute -bottom-1 text-xs">{seatNumber}</span>
     </div>
-  </motion.div>
-));
+  );
+});
 
-const Section = React.memo(({ sectionId, rows, selectedSeats, onSeatSelect, isActive }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-    className={`mb-8 p-6 rounded-xl shadow-md transition-all duration-300 ${isActive ? "border-2 border-black bg-gray-50" : "border border-gray-300 hover:border-black"}`}
-  >
-    <h3 className="text-xl font-semibold mb-4 text-black text-center">{sectionId}</h3>
-    <AnimatePresence>
-      {Object.entries(rows).map(([rowId, seats]) => (
-        <Row key={rowId} rowId={rowId} seats={seats} selectedSeats={selectedSeats} onSeatSelect={onSeatSelect} />
-      ))}
-    </AnimatePresence>
-  </motion.div>
-));
+// Row Component
+const Row = React.memo(({ 
+  rowId, 
+  seats, 
+  sectionPrice
+}) => {
+  const subRows = [];
+  for (let i = 0; i < seats.length; i += MAX_SEATS_PER_ROW) {
+    subRows.push(seats.slice(i, i + MAX_SEATS_PER_ROW));
+  }
 
-const Screen = () => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.5 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.5 }}
-    className="w-full h-16 bg-gradient-to-r from-gray-300 to-gray-400 text-black text-sm rounded-b-3xl flex items-center justify-center mt-10 shadow-lg"
-  >
-    <span className="text-lg font-bold">Screen</span>
-  </motion.div>
-);
-
-const Legend = () => (
-  <div className="flex justify-center space-x-6 mb-6">
-    {[
-      { className: "bg-black text-white", label: "Selected", icon: <FaSquare /> },
-      { className: "bg-white text-black border-black", label: "Available", icon: <FaSquare /> },
-      { className: "bg-gray-300 text-gray-500 opacity-50", label: "Unavailable", icon: <FaSquare /> },
-    ].map(({ className, label, icon }) => (
-      <div className="flex items-center" key={label}>
-        <div className={`w-8 h-8 ${className} rounded mr-2 border flex items-center justify-center`}>
-          {icon}
-        </div>
-        <span className="text-black">{label}</span>
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-4 bg-gray-50 p-2 rounded-lg"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-lg font-bold mr-4 text-gray-700">Row {rowId}</span>
+        <span className="text-sm text-gray-500">
+          {seats.length} seats | {seats.filter(s => !s.isDisabled).length} available
+        </span>
       </div>
-    ))}
-  </div>
-);
+      {subRows.map((subRow, index) => (
+        <div key={index} className="flex items-center justify-center mb-1">
+          {subRow.map((seat) => (
+            <Seat
+              key={seat.id}
+              {...seat}
+              price={sectionPrice}
+              seatNumber={seat.id.split('-').pop()}
+            />
+          ))}
+        </div>
+      ))}
+    </motion.div>
+  );
+});
 
-export function Seating() {
-  const [layout, setLayout] = useState({});
-  const [selectedSeats, setSelectedSeats] = useState([]);
-  const [newSectionName, setNewSectionName] = useState("");
-  const [currentSection, setCurrentSection] = useState("");
-  const [newRowName, setNewRowName] = useState("");
-  const [newSeatCount, setNewSeatCount] = useState("");
-  const [seatPrice, setSeatPrice] = useState("");
-  const [totalPrice, setTotalPrice] = useState(0);
+const Seating = () => {
+  // State Management
+  const [layout, setLayout] = useState(() => {
+    const savedLayout = localStorage.getItem('seatLayout');
+    return savedLayout ? JSON.parse(savedLayout) : {};
+  });
+  const [editMode, setEditMode] = useState(false);
+  const [modalState, setModalState] = useState({
+    section: null,
+    type: null
+  });
 
-  useEffect(() => {
-    const newTotalPrice = selectedSeats.reduce((sum, id) => {
-      const [section, row] = id.split('-');
-      return sum + layout[section][row].find(seat => seat.id === id).price;
-    }, 0);
-    setTotalPrice(newTotalPrice);
-  }, [selectedSeats, layout]);
+  // Save layout to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('seatLayout', JSON.stringify(layout));
+  }, [layout]);
 
-  const handleSeatSelect = useCallback((seatId) => {
-    setSelectedSeats(prev => {
-      const newSelection = prev.includes(seatId) 
-        ? prev.filter(id => id !== seatId) 
-        : [...prev, seatId];
-      
-      toast.success(`Updated selection. Total: $${totalPrice.toFixed(2)}`);
-      return newSelection;
-    });
-  }, [layout, totalPrice]);
-
-  const addRow = useCallback(() => {
-    if (!currentSection || !newRowName || !newSeatCount) {
-      toast.error("Please fill in all fields before adding a row.");
+  // Add Section Handler
+  const addSection = useCallback((name, price) => {
+    if (Object.keys(layout).length >= MAX_SECTIONS) {
+      toast.error(`Maximum ${MAX_SECTIONS} sections allowed`);
       return;
     }
 
-    const seatCount = parseInt(newSeatCount, 10);
-
-    if (isNaN(seatCount) || seatCount <= 0 || seatCount > 50) {
-      toast.error("Please enter a valid seat count (1-50).");
+    if (layout[name]) {
+      toast.error('Section name already exists');
       return;
     }
 
     setLayout(prev => ({
       ...prev,
-      [currentSection]: {
-        ...prev[currentSection],
-        [newRowName]: Array.from({ length: seatCount }, (_, i) => ({
-          id: `${currentSection}-${newRowName}-seat-${i + 1}`,
-          isAvailable: true,
-          price: prev[currentSection].price,
-        })),
-      },
+      [name]: { price: parseFloat(price), rows: {} }
     }));
-
-    setNewRowName("");
-    setNewSeatCount("");
-    toast.success("Row added successfully!");
-  }, [currentSection, newRowName, newSeatCount]);
-
-  const addSection = useCallback(() => {
-    if (!newSectionName.trim() || !seatPrice) {
-      toast.error("Please enter a section name and seat price.");
-      return;
-    }
-    const price = parseFloat(seatPrice);
-    if (isNaN(price) || price <= 0) {
-      toast.error("Please enter a valid seat price.");
-      return;
-    }
-    setLayout(prev => ({ ...prev, [newSectionName]: { price: price } }));
-    setCurrentSection(newSectionName);
-    setNewSectionName("");
-    setSeatPrice("");
+    setModalState({ section: null, type: null });
     toast.success("Section added successfully!");
-  }, [newSectionName, seatPrice]);
+  }, [layout]);
 
-  const clearLayout = useCallback(() => {
-    if (window.confirm("Are you sure you want to clear the layout?")) {
-      setLayout({});
-      setSelectedSeats([]);
-      setCurrentSection("");
-      toast.success("Layout cleared successfully!");
+  // Add Row Handler
+  const addRow = useCallback((section, rowName, seatCount) => {
+    if (!section) {
+      toast.error("Select a section first");
+      return;
+    }
+
+    const rowCount = Object.keys(layout[section].rows).length;
+    if (rowCount >= MAX_ROWS_PER_SECTION) {
+      toast.error(`Maximum ${MAX_ROWS_PER_SECTION} rows per section allowed`);
+      return;
+    }
+
+    if (layout[section].rows[rowName]) {
+      toast.error('Row name already exists in this section');
+      return;
+    }
+
+    const numSeats = parseInt(seatCount);
+    if (numSeats > MAX_SEATS_PER_ROW) {
+      toast.error(`Maximum ${MAX_SEATS_PER_ROW} seats per row allowed`);
+      return;
+    }
+
+    setLayout(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        rows: {
+          ...prev[section].rows,
+          [rowName]: Array.from({ length: numSeats }, (_, i) => ({
+            id: `${section}-${rowName}-${i + 1}`,
+            isDisabled: false
+          }))
+        }
+      }
+    }));
+    setModalState({ section: null, type: null });
+    toast.success("Row added successfully!");
+  }, [layout]);
+
+  // Delete Section Handler
+  const deleteSection = useCallback((sectionName) => {
+    if (window.confirm(`Are you sure you want to delete section ${sectionName}?`)) {
+      setLayout(prev => {
+        const newLayout = { ...prev };
+        delete newLayout[sectionName];
+        return newLayout;
+      });
+      toast.success(`Section ${sectionName} deleted`);
     }
   }, []);
 
-  const layoutSections = useMemo(() => (
-    Object.entries(layout).map(([sectionId, sectionData]) => (
-      <Section
-        key={sectionId}
-        sectionId={sectionId}
-        rows={Object.fromEntries(Object.entries(sectionData).filter(([key]) => key !== 'price'))}
-        selectedSeats={selectedSeats}
-        onSeatSelect={handleSeatSelect}
-        isActive={currentSection === sectionId}
-      />
-    ))
-  ), [layout, selectedSeats, handleSeatSelect, currentSection]);
-
-  return (
-    <div className="max-w-6xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-4xl font-bold mb-8 text-center text-black"
-      >
-        Cinema Seating Arrangement
-      </motion.h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gray-50 p-6 rounded-xl shadow-md"
-        >
-          <h2 className="text-xl font-semibold mb-4 text-black">Add New Section</h2>
-          <input
-            type="text"
-            placeholder="Section Name (e.g., VIP)"
-            value={newSectionName}
-            onChange={(e) => setNewSectionName(e.target.value)}
-            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300 mb-4"
-          />
-          <input
-            type="number"
-            placeholder="Seat Price"
-            value={seatPrice}
-            onChange={(e) => setSeatPrice(e.target.value)}
-            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300"
-          />
-          <Button onClick={addSection} className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
-            Add Section
-          </Button>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gray-50 p-6 rounded-xl shadow-md"
-        >
-          <h2 className="text-xl font-semibold mb-4 text-black">Add New Row</h2>
-          <select
-            value={currentSection}
-            onChange={(e) => setCurrentSection(e.target.value)}
-            className="w-full p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300 mb-4"
-          >
-            <option value="">Select Section</option>
-            {Object.keys(layout).map((section) => (
-              <option key={section} value={section}>{section}</option>
-            ))}
-          </select>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Row Name"
-              value={newRowName}
-              onChange={(e) => setNewRowName(e.target.value)}
-              className="p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300"
-            />
-            <input
-              type="number"
-              placeholder="Seats"
-              value={newSeatCount}
-              onChange={(e) => setNewSeatCount(e.target.value)}
-              className="p-3 border-2 rounded-lg focus:outline-none focus:border-black transition-colors duration-300"
-            />
-          </div>
-          <Button onClick={addRow} className="mt-4 w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">
-            Add Row
-          </Button>
-        </motion.div>
-      </div>
-
-      <Button onClick={clearLayout} className="mb-8 w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300">
-        Clear Layout
-      </Button>
-
-      <Legend />
-
-      <div className="bg-gray-50 p-8 rounded-2xl shadow-lg">
-        <div className="overflow-x-auto">{layoutSections}</div>
-        <Screen />
-      </div>
-
+  // Render Sections
+  const renderSections = useMemo(() => {
+    return Object.entries(layout).map(([sectionName, sectionData]) => (
       <motion.div 
+        key={sectionName}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mt-8 bg-gray-50 p-6 rounded-xl shadow-md"
+        className="bg-white rounded-xl shadow-md p-6 mb-6"
       >
-        <h2 className="text-2xl font-bold mb-4 text-black">Selected Seats:</h2>
-        <p className="text-lg text-black">{selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}</p>
-        <p className="text-xl font-bold mt-4 text-black">Total Price: ${totalPrice.toFixed(2)}</p>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {sectionName} (${sectionData.price.toFixed(2)})
+          </h3>
+          {editMode && (
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setModalState({ section: sectionName, type: 'add-row' })}
+                title="Add Row"
+              >
+                <FaPlus />
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="icon"
+                onClick={() => deleteSection(sectionName)}
+                title="Delete Section"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          )}
+        </div>
+        {Object.entries(sectionData.rows).map(([rowName, seats]) => (
+          <Row
+            key={rowName}
+            rowId={rowName}
+            seats={seats}
+            sectionPrice={sectionData.price}
+          />
+        ))}
       </motion.div>
+    ));
+  }, [layout, editMode, deleteSection]);
+
+  return (
+    <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
+      <motion.h1 
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl font-bold text-center mb-10 text-gray-800"
+      >
+        Cinema Seat Layout Viewer
+      </motion.h1>
+
+      <div className="flex justify-between mb-6">
+        <Button 
+          onClick={() => setModalState({ section: null, type: 'add-section' })}
+          className="flex items-center gap-2"
+          disabled={Object.keys(layout).length >= MAX_SECTIONS}
+        >
+          <FaPlus /> Add Section
+        </Button>
+        <Button 
+          onClick={() => setEditMode(!editMode)}
+          variant={editMode ? "destructive" : "outline"}
+        >
+          {editMode ? 'Exit Edit Mode' : 'Edit Layout'}
+        </Button>
+      </div>
+
+      <AnimatePresence>
+        <div className="grid gap-6">
+          {renderSections}
+        </div>
+      </AnimatePresence>
+
+      {/* Modal for Adding Sections and Rows */}
+      <Dialog 
+        open={!!modalState.type} 
+        onOpenChange={() => setModalState({ section: null, type: null })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {modalState.type === 'add-section' 
+                ? 'Add New Section' 
+                : `Add Row to ${modalState.section}`}
+            </DialogTitle>
+          </DialogHeader>
+          {modalState.type === 'add-section' ? (
+            <SectionForm onSubmit={addSection} />
+          ) : (
+            <RowForm 
+              section={modalState.section} 
+              onSubmit={addRow} 
+              maxSeats={MAX_SEATS_PER_ROW}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
-}
+};
+
+// Sub-components for Forms
+const SectionForm = ({ onSubmit }) => {
+  const [sectionName, setSectionName] = useState('');
+  const [price, setPrice] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!sectionName.trim()) {
+      toast.error('Please enter a section name');
+      return;
+    }
+    if (!price || price <= 0) {
+      toast.error('Please enter a valid price');
+      return;
+    }
+    onSubmit(sectionName.trim(), price);
+    setSectionName('');
+    setPrice('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input 
+        type="text" 
+        placeholder="Section Name (e.g., VIP)" 
+        value={sectionName}
+        onChange={(e) => setSectionName(e.target.value)}
+        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+        maxLength={20}
+        required
+      />
+      <input 
+        type="number" 
+        placeholder="Seat Price" 
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+        min="0.01"
+        step="0.01"
+        required
+      />
+      <Button type="submit" className="w-full">
+        <FaSave className="mr-2" /> Save Section
+      </Button>
+    </form>
+  );
+};
+
+const RowForm = ({ section, onSubmit, maxSeats }) => {
+  const [rowName, setRowName] = useState('');
+  const [seatCount, setSeatCount] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!rowName.trim()) {
+      toast.error('Please enter a row name');
+      return;
+    }
+    if (!seatCount || seatCount < 1) {
+      toast.error('Please enter a valid number of seats');
+      return;
+    }
+    onSubmit(section, rowName.trim(), seatCount);
+    setRowName('');
+    setSeatCount('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input 
+        type="text" 
+        placeholder="Row Name (e.g., A)" 
+        value={rowName}
+        onChange={(e) => setRowName(e.target.value)}
+        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+        maxLength={3}
+        required
+      />
+      <input 
+        type="number" 
+        placeholder={`Number of Seats (max ${maxSeats})`} 
+        value={seatCount}
+        onChange={(e) => setSeatCount(e.target.value)}
+        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+        min="1"
+        max={maxSeats}
+        required
+      />
+      <Button type="submit" className="w-full">
+        <FaSave className="mr-2" /> Add Row
+      </Button>
+    </form>
+  );
+};
+
+export default Seating;

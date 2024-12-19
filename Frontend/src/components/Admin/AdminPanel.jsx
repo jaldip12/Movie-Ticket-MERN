@@ -21,13 +21,13 @@ import {
   DollarSignIcon,
   FilmIcon,
   LayoutGridIcon,
-  MapPinIcon,
   MoveHorizontalIcon,
   ShoppingCartIcon,
-  UsersIcon,
   SettingsIcon,
   LogOutIcon,
   SearchIcon,
+  SofaIcon,
+  TicketIcon,
 } from "lucide-react";
 import { motion } from 'framer-motion';
 
@@ -42,11 +42,11 @@ export function AdminPanel() {
         <nav className="p-4">
           {[
             { icon: LayoutGridIcon, label: "Dashboard", path: "/admin" },
-            { icon: FilmIcon, label: "Movies", path: "/movies" },
-            { icon: MapPinIcon, label: "Theaters", path: "/theaters" },
-            { icon: CalendarIcon, label: "Bookings", path: "/bookings" },
-            { icon: UsersIcon, label: "Users", path: "/users" },
-            { icon: SettingsIcon, label: "Settings", path: "/settings" },
+            { icon: FilmIcon, label: "Movies", path: "/admin/movies" },
+            { icon: CalendarIcon, label: "Bookings", path: "/admin/bookings" },
+            { icon: SofaIcon, label: "Seating", path: "/admin/seating" },
+            { icon: TicketIcon, label: "Shows", path: "/admin/shows" },
+            { icon: SettingsIcon, label: "Settings", path: "/admin/settings" },
           ].map(({ icon: Icon, label, path }) => (
             <Link
               key={label}
@@ -90,7 +90,6 @@ export function AdminPanel() {
           {[
             { label: "Total Bookings", value: "12,345", icon: ShoppingCartIcon, color: "bg-blue-600" },
             { label: "Total Revenue", value: "$123,456", icon: DollarSignIcon, color: "bg-green-600" },
-            { label: "New Users", value: "1,234", icon: UsersIcon, color: "bg-yellow-600" },
             { label: "Upcoming Shows", value: "78", icon: CalendarIcon, color: "bg-purple-600" },
           ].map(({ label, value, icon: Icon, color }, index) => (
             <motion.div
@@ -174,32 +173,6 @@ export function AdminPanel() {
               </TableBody>
             </Table>
           </Card>
-        </motion.section>
-
-        {/* Theaters Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <h2 className="text-2xl font-semibold mb-4 text-yellow-400">Top Theaters</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { name: "Cinépolis VIP", location: "Ahmedabad", capacity: 150 },
-              { name: "INOX Megaplex", location: "Mumbai", capacity: 200 },
-              { name: "PVR Directors Cut", location: "Delhi", capacity: 180 },
-            ].map((theater, index) => (
-              <Card key={index} className="bg-gray-700 text-white border-none hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <h3 className="text-xl font-semibold text-yellow-400">{theater.name}</h3>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300">Location: {theater.location}</p>
-                  <p className="text-gray-300">Capacity: {theater.capacity} seats</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </motion.section>
       </main>
     </div>
