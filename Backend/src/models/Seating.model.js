@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const seatingSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -19,7 +18,7 @@ const seatingSchema = new mongoose.Schema({
         },
         columns: {
             type: Number,
-            required: true, 
+            required: true,
             min: 1
         },
         price: {
@@ -28,19 +27,37 @@ const seatingSchema = new mongoose.Schema({
             min: 0
         },
         seats: [{
-            row: Number,
-            column: Number,
-            seatNumber: String,
-            isBlocked: {
+            row: {
+                type: String,
+                required: true
+            },
+            seatNumber: {
+                type: Number,
+                required: true,
+                min: 1
+            },
+            isAvailable: {
                 type: Boolean,
-                default: false
+                default: true
             },
             isBooked: {
                 type: Boolean,
                 default: false
+            },
+            isVisible: {
+                type: Boolean,
+                default: false
             }
         }]
-    }]
+    }],
+    totalRows: {
+        type: Number,
+        required: true
+    },
+    seatsPerRow: {
+        type: Number, 
+        required: true
+    }
 }, { timestamps: true });
 
 const Seating = mongoose.model("Seating", seatingSchema);
