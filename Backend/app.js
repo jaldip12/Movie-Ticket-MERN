@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import router from "./src/routes/user.routes.js";
 import routerM from "./src/routes/movie.routes.js";
+import routerS from "./src/routes/Seating.routes.js";
 const app = express();
 
 app.use(
@@ -24,4 +25,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/users",router)
 app.use("/api/v1/movies",routerM)
+app.use("/api/v1/seating", routerS)
+
 export { app };
