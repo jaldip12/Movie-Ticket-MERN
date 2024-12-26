@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SidePanel from "../Admin/SidePanel";
+import SeatingEditor from "./SeatingEditor"; // Import the SeatingEditor component
 
 const SeatingPlans = () => {
   const [seatingPlans, setSeatingPlans] = useState([]);
@@ -10,8 +11,10 @@ const SeatingPlans = () => {
   const [newPlanName, setNewPlanName] = useState("");
   const [rows, setRows] = useState(10); // Default values
   const [columns, setColumns] = useState(10); // Default values
+  const [selectedPlan, setSelectedPlan] = useState(null); // State to hold the selected plan
   const navigate = useNavigate();
 
+  
   useEffect(() => {
     fetchSeatingPlans();
   }, []);
@@ -30,7 +33,7 @@ const SeatingPlans = () => {
   };
 
   const handleViewEdit = (id) => {
-    navigate(`/seating-editor/${id}`);
+    navigate(`edit/${id}`); // Navigate to the SeatingEditor page with the plan ID
   };
 
   const handleCreateNew = () => {
@@ -148,6 +151,14 @@ const SeatingPlans = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Seating Editor */}
+        {selectedPlan && (
+          <SeatingEditor 
+            planId={selectedPlan} 
+            onClose={() => setSelectedPlan(null)} // Close the editor when the plan is deselected
+          />
         )}
 
         <div className="overflow-x-auto">
