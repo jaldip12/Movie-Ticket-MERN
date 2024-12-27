@@ -1,64 +1,54 @@
 import mongoose from "mongoose";
-const seatingSchema = new mongoose.Schema({
+
+const seatingSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
-    sections: [{
+    sections: [
+      {
         name: {
-            type: String,
-            required: true,
-            trim: true
+          type: String,
+          required: true,
+          trim: true,
         },
         rows: {
-            type: Number,
-            required: true,
-            min: 1
+          type: Number,
+          required: true,
+          min: 1,
         },
         columns: {
-            type: Number,
-            required: true,
-            min: 1
+          type: Number,
+          required: true,
+          min: 1,
         },
         price: {
-            type: Number,
-            required: true,
-            min: 0
+          type: Number,
+          required: true,
+          min: 0,
         },
-        seats: [{
+        unavailableSeats: [
+          {
             row: {
-                type: String,
-                required: true
+              type: String,
+              required: true,
             },
-            seatNumber: {
+            seats: [
+              {
                 type: Number,
                 required: true,
-                min: 1
-            },
-            isAvailable: {
-                type: Boolean,
-                default: true
-            },
-            isBooked: {
-                type: Boolean,
-                default: false
-            },
-            isVisible: {
-                type: Boolean,
-                default: false
-            }
-        }]
-    }],
-    totalRows: {
-        type: Number,
-        required: true
-    },
-    seatsPerRow: {
-        type: Number, 
-        required: true
-    }
-}, { timestamps: true });
+                min: 1,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 const Seating = mongoose.model("Seating", seatingSchema);
 export default Seating;

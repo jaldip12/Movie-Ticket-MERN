@@ -46,32 +46,28 @@ routerS.get("/seatingplans/:id", async (req, res) => {
 // Create new seating plan
 routerS.post("/seatingplans", async (req, res) => {
     try {
-        const { name, sections, price } = req.body;
+        const { name, sections } = req.body;
 
-        // Calculate total rows and seats per row
-        const totalRows = sections.reduce((max, section) => Math.max(max, section.rows), 0);
-        const seatsPerRow = sections.reduce((max, section) => Math.max(max, section.seatsPerRow), 0);
+        // Validate input
+        if (!name || !sections || !Array.isArray(sections)) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: "Invalid input data"
+            });
+        }
 
         // Transform sections data to match model schema
         const transformedSections = sections.map(section => ({
             name: section.name,
             rows: section.rows,
-            columns: section.seatsPerRow,
-            price: price || 0,
-            seats: Array.from({ length: section.rows * section.seatsPerRow }, (_, index) => ({
-                row: String.fromCharCode(65 + Math.floor(index / section.seatsPerRow)),
-                seatNumber: (index % section.seatsPerRow) + 1,
-                isAvailable: true,
-                isBooked: false,
-                isVisible: true
-            }))
+            columns: section.columns,
+            price: section.price,
+            unavailableSeats: section.unavailableSeats || [] // Include unavailable seats if provided
         }));
 
         const seatingPlan = await Seating.create({
             name,
-            sections: transformedSections,
-            totalRows,
-            seatsPerRow
+            sections: transformedSections
         });
 
         return res.status(201).json({
@@ -90,36 +86,32 @@ routerS.post("/seatingplans", async (req, res) => {
 // Update seating plan
 routerS.put("/seatingplans/:id", async (req, res) => {
     try {
-        const { name, sections, price } = req.body;
+        const { name, sections } = req.body;
 
-        // Calculate total rows and seats per row
-        const totalRows = sections.reduce((max, section) => Math.max(max, section.rows), 0);
-        const seatsPerRow = sections.reduce((max, section) => Math.max(max, section.seatsPerRow), 0);
+        // Validate input
+        if (!name || !sections || !Array.isArray(sections)) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: "Invalid input data"
+            });
+        }
 
-        // Transform sections data to match model schema
+        // Transform sections data to match schema
         const transformedSections = sections.map(section => ({
             name: section.name,
             rows: section.rows,
-            columns: section.seatsPerRow,
-            price: price || 0,
-            seats: Array.from({ length: section.rows * section.seatsPerRow }, (_, index) => ({
-                row: String.fromCharCode(65 + Math.floor(index / section.seatsPerRow)),
-                seatNumber: (index % section.seatsPerRow) + 1,
-                isAvailable: true,
-                isBooked: false,
-                isVisible: true
-            }))
+            columns: section.columns,
+            price: section.price,
+            unavailableSeats: section.unavailableSeats || [] // Include unavailable seats if provided
         }));
 
         const updatedPlan = await Seating.findByIdAndUpdate(
             req.params.id,
             {
                 name,
-                sections: transformedSections,
-                totalRows,
-                seatsPerRow
+                sections: transformedSections
             },
-            { new: true }
+            { new: true } // Return the updated document
         );
 
         if (!updatedPlan) {
@@ -128,6 +120,7 @@ routerS.put("/seatingplans/:id", async (req, res) => {
                 message: "Seating plan not found"
             });
         }
+
         return res.status(200).json({
             statusCode: 200,
             data: updatedPlan,
