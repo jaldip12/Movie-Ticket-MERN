@@ -6,22 +6,22 @@ import axios from "axios";
 
 const SeatingEditor = () => {
   const [canvas, setCanvas] = useState({
-    name: "Cinema Room",
-    width: 1000,
-    height: 600,
+    name: "",
   });
   const [sections, setSections] = useState([]);
   const [newSection, setNewSection] = useState({
-    name: "Platinum", 
+    name: "Platinum",
     rows: 10,
     columns: 10,
     price: 0,
+    unavailableSeats: []
   });
   const [totalRows, setTotalRows] = useState(0);
+  const [layoutId, setLayoutId] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCanvas((prev) => ({ ...prev, [name]: name === "name" ? value : parseInt(value) || 0 }));
+    setCanvas((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSectionInputChange = (e) => {
@@ -33,26 +33,34 @@ const SeatingEditor = () => {
   };
 
   const handleAddSection = () => {
-    const seats = Array.from(
-      { length: newSection.rows * newSection.columns },
-      (_, index) => ({
-        row: String.fromCharCode(65 + totalRows + Math.floor(index / newSection.columns)),
-        seatNumber: (index % newSection.columns) + 1,
-        isAvailable: true,
-        isVisible: true,
-        isBooked: false,
-        price: newSection.price,
-      })
-    );
+    // Validate section data
+    if (!newSection.name || !newSection.rows || !newSection.columns || !newSection.price) {
+      alert('Missing required section fields');
+      return;
+    }
+    if (newSection.rows < 1 || newSection.columns < 1 || newSection.price < 0) {
+      alert('Invalid section values');
+      return;
+    }
 
     const newSectionData = {
-      name: newSection.name,
+      name: newSection.name.trim(),
       rows: newSection.rows,
       columns: newSection.columns,
-      seats: seats,
-      position: { x: 50, y: 50 },
       price: newSection.price,
-      startingRow: totalRows
+      startingRow: totalRows,
+      unavailableSeats: [],
+      seats: Array.from(
+        { length: newSection.rows * newSection.columns },
+        (_, index) => ({
+          row: String.fromCharCode(65 + totalRows + Math.floor(index / newSection.columns)),
+          seatNumber: (index % newSection.columns) + 1,
+          isAvailable: true,
+          isVisible: true,
+          isBooked: false,
+          price: newSection.price,
+        })
+      )
     };
 
     setSections([...sections, newSectionData]);
@@ -64,10 +72,8 @@ const SeatingEditor = () => {
   };
 
   const handleDeleteSection = (sectionIndex) => {
-    const removedSection = sections[sectionIndex];
     setSections(sections.filter((_, index) => index !== sectionIndex));
     
-    // Recalculate total rows and update remaining sections
     let newTotalRows = 0;
     const updatedSections = sections.filter((_, index) => index !== sectionIndex).map(section => {
       const updatedSection = {
@@ -91,11 +97,43 @@ const SeatingEditor = () => {
       if (idx === sectionIndex) {
         const seatArrayIndex = rowIndex * section.columns + seatIndex;
         const updatedSeats = [...section.seats];
+        const rowLetter = String.fromCharCode(65 + section.startingRow + rowIndex);
+        const seatNumber = seatIndex + 1;
+        
+        // Toggle availability
         updatedSeats[seatArrayIndex] = {
           ...updatedSeats[seatArrayIndex],
           isAvailable: !updatedSeats[seatArrayIndex].isAvailable
         };
-        return { ...section, seats: updatedSeats };
+
+        // Update unavailable seats array
+        let unavailableSeats = section.unavailableSeats ? [...section.unavailableSeats] : [];
+        const rowEntry = unavailableSeats.find(r => r.row === rowLetter);
+
+        if (!updatedSeats[seatArrayIndex].isAvailable) {
+          if (rowEntry) {
+            if (!rowEntry.seats.includes(seatNumber)) {
+              rowEntry.seats.push(seatNumber);
+              rowEntry.seats.sort((a, b) => a - b);
+            }
+          } else {
+            unavailableSeats.push({ row: rowLetter, seats: [seatNumber] });
+            unavailableSeats.sort((a, b) => a.row.localeCompare(b.row));
+          }
+        } else {
+          if (rowEntry) {
+            rowEntry.seats = rowEntry.seats.filter(s => s !== seatNumber);
+            if (rowEntry.seats.length === 0) {
+              unavailableSeats = unavailableSeats.filter(r => r.row !== rowLetter);
+            }
+          }
+        }
+
+        return { 
+          ...section, 
+          seats: updatedSeats,
+          unavailableSeats: unavailableSeats
+        };
       }
       return section;
     }));
@@ -103,25 +141,39 @@ const SeatingEditor = () => {
 
   const handleSavePlan = async () => {
     try {
+      // Validate input data
+      if (!canvas.name) {
+        alert('Please enter a name for the seating plan');
+        return;
+      }
+
+      // Transform data to match backend schema
       const seatingPlanData = {
-        name: canvas.name,
+        name: canvas.name.trim(),
         sections: sections.map(section => ({
-          name: section.name,
+          name: section.name.trim(),
           rows: section.rows,
-          seatsPerRow: section.columns,
+          columns: section.columns,
           price: section.price,
-          seats: section.seats
+          unavailableSeats: section.unavailableSeats || []
         }))
       };
 
-      const response = await axios.post('http://localhost:8000/api/v1/seating/seatingplans', seatingPlanData);
-      
-      if (response.status === 201) {
-        alert('Seating plan saved successfully!');
+      if (layoutId) {
+        const response = await axios.put(`http://localhost:8000/api/v1/seating/seatingplans/${layoutId}`, seatingPlanData);
+        if (response.data.statusCode === 200) {
+          alert(response.data.message);
+        }
+      } else {
+        const response = await axios.post('http://localhost:8000/api/v1/seating/seatingplans', seatingPlanData);
+        if (response.data.statusCode === 201) {
+          setLayoutId(response.data.data.id);
+          alert(response.data.message);
+        }
       }
     } catch (error) {
       console.error('Error saving seating plan:', error);
-      alert('Failed to save seating plan. Please try again.');
+      alert(error.response?.data?.message || 'Failed to save seating plan. Please try again.');
     }
   };
 
@@ -141,70 +193,83 @@ const SeatingEditor = () => {
                   name="name"
                   value={canvas.name}
                   onChange={handleInputChange}
-                  placeholder="Plan Name"
+                  placeholder="Enter seating plan name"
                 />
               </div>
-              <Button className="w-full mt-4" onClick={handleSavePlan}>Save Seat Plan</Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Add Section</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Input
-                type="text"
-                name="name"
-                value={newSection.name}
-                onChange={handleSectionInputChange}
-                placeholder="Section Name"
-              />
-              <div>
-                <label className="text-sm font-medium">Price per Seat:</label>
-                <Input
-                  type="number"
-                  name="price"
-                  value={newSection.price}
-                  onChange={handleSectionInputChange}
-                  placeholder="Price"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Number of Rows (A-Z):</label>
-                <Input
-                  type="number"
-                  name="rows"
-                  value={newSection.rows}
-                  onChange={handleSectionInputChange}
-                  placeholder="Rows"
-                  min="1"
-                  max={26 - totalRows}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Seats in Each Row (1-50):</label>
-                <Input
-                  type="number"
-                  name="columns"
-                  value={newSection.columns}
-                  onChange={handleSectionInputChange}
-                  placeholder="Seats Per Row"
-                  min="1"
-                  max="50"
-                />
-              </div>
-              <Button
-                onClick={handleAddSection}
-                className="w-full"
-                disabled={!newSection.name || newSection.rows < 1 || newSection.columns < 1 || newSection.price <= 0 || (totalRows + newSection.rows) > 26}
+              {layoutId && (
+                <div>
+                  <label className="text-sm font-medium">Plan ID: {layoutId}</label>
+                </div>
+              )}
+              <Button 
+                className="w-full mt-4" 
+                onClick={handleSavePlan}
+                disabled={!canvas.name.trim()}
               >
-                Add Section
+                {layoutId ? 'Update Seat Plan' : 'Save New Seat Plan'}
               </Button>
             </CardContent>
           </Card>
+
+          {layoutId && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add Section</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Input
+                  type="text"
+                  name="name"
+                  value={newSection.name}
+                  onChange={handleSectionInputChange}
+                  placeholder="Section Name"
+                />
+                <div>
+                  <label className="text-sm font-medium">Price per Seat:</label>
+                  <Input
+                    type="number"
+                    name="price"
+                    value={newSection.price}
+                    onChange={handleSectionInputChange}
+                    placeholder="Price"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Number of Rows (A-Z):</label>
+                  <Input
+                    type="number"
+                    name="rows"
+                    value={newSection.rows}
+                    onChange={handleSectionInputChange}
+                    placeholder="Rows"
+                    min="1"
+                    max={26 - totalRows}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Seats in Each Row (1-50):</label>
+                  <Input
+                    type="number"
+                    name="columns"
+                    value={newSection.columns}
+                    onChange={handleSectionInputChange}
+                    placeholder="Seats Per Row"
+                    min="1"
+                    max="50"
+                  />
+                </div>
+                <Button
+                  onClick={handleAddSection}
+                  className="w-full"
+                  disabled={!newSection.name || newSection.rows < 1 || newSection.columns < 1 || newSection.price <= 0 || (totalRows + newSection.rows) > 26}
+                >
+                  Add Section
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <div className="bg-white border rounded-lg shadow-lg p-8">
@@ -214,7 +279,7 @@ const SeatingEditor = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold">{section.name}</h3>
-                    <p className="text-sm text-gray-600">Price: ${section.price}</p>
+                    <p className="text-sm text-gray-600">Price: ₹{section.price}</p>
                   </div>
                   <Button
                     variant="destructive"

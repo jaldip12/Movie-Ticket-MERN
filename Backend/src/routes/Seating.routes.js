@@ -23,7 +23,7 @@ routerS.get("/seatingplans", async (req, res) => {
 // Get seating plan by ID
 routerS.get("/seatingplans/:id", async (req, res) => {
     try {
-        const seatingPlan = await Seating.findById(req.params.id);
+        const seatingPlan = await Seating.findOne({ id: req.params.id });
         if (!seatingPlan) {
             return res.status(404).json({
                 statusCode: 404,
@@ -56,17 +56,49 @@ routerS.post("/seatingplans", async (req, res) => {
             });
         }
 
+        // Validate sections data against schema requirements
+        for (const section of sections) {
+            if (!section.name || !section.rows || !section.columns || !section.price) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: "Missing required section fields"
+                });
+            }
+            if (section.rows < 1 || section.columns < 1 || section.price < 0) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: "Invalid section values"
+                });
+            }
+            if (section.unavailableSeats) {
+                for (const unavailableSeat of section.unavailableSeats) {
+                    if (!unavailableSeat.row || !Array.isArray(unavailableSeat.seats)) {
+                        return res.status(400).json({
+                            statusCode: 400,
+                            message: "Invalid unavailable seats format"
+                        });
+                    }
+                    if (unavailableSeat.seats.some(seat => seat < 1)) {
+                        return res.status(400).json({
+                            statusCode: 400,
+                            message: "Invalid seat numbers in unavailable seats"
+                        });
+                    }
+                }
+            }
+        }
+
         // Transform sections data to match model schema
         const transformedSections = sections.map(section => ({
-            name: section.name,
+            name: section.name.trim(),
             rows: section.rows,
             columns: section.columns,
             price: section.price,
-            unavailableSeats: section.unavailableSeats || [] // Include unavailable seats if provided
+            unavailableSeats: section.unavailableSeats || []
         }));
 
         const seatingPlan = await Seating.create({
-            name,
+            name: name.trim(),
             sections: transformedSections
         });
 
@@ -96,22 +128,54 @@ routerS.put("/seatingplans/:id", async (req, res) => {
             });
         }
 
+        // Validate sections data against schema requirements
+        for (const section of sections) {
+            if (!section.name || !section.rows || !section.columns || !section.price) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: "Missing required section fields"
+                });
+            }
+            if (section.rows < 1 || section.columns < 1 || section.price < 0) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: "Invalid section values"
+                });
+            }
+            if (section.unavailableSeats) {
+                for (const unavailableSeat of section.unavailableSeats) {
+                    if (!unavailableSeat.row || !Array.isArray(unavailableSeat.seats)) {
+                        return res.status(400).json({
+                            statusCode: 400,
+                            message: "Invalid unavailable seats format"
+                        });
+                    }
+                    if (unavailableSeat.seats.some(seat => seat < 1)) {
+                        return res.status(400).json({
+                            statusCode: 400,
+                            message: "Invalid seat numbers in unavailable seats"
+                        });
+                    }
+                }
+            }
+        }
+
         // Transform sections data to match schema
         const transformedSections = sections.map(section => ({
-            name: section.name,
+            name: section.name.trim(),
             rows: section.rows,
             columns: section.columns,
             price: section.price,
-            unavailableSeats: section.unavailableSeats || [] // Include unavailable seats if provided
+            unavailableSeats: section.unavailableSeats || []
         }));
 
-        const updatedPlan = await Seating.findByIdAndUpdate(
-            req.params.id,
+        const updatedPlan = await Seating.findOneAndUpdate(
+            { id: req.params.id },
             {
-                name,
+                name: name.trim(),
                 sections: transformedSections
             },
-            { new: true } // Return the updated document
+            { new: true }
         );
 
         if (!updatedPlan) {
@@ -137,7 +201,7 @@ routerS.put("/seatingplans/:id", async (req, res) => {
 // Delete seating plan
 routerS.delete("/seatingplans/:id", async (req, res) => {
     try {
-        const deletedPlan = await Seating.findByIdAndDelete(req.params.id);
+        const deletedPlan = await Seating.findOneAndDelete({ id: req.params.id });
         if (!deletedPlan) {
             return res.status(404).json({
                 statusCode: 404,
