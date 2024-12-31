@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const SeatingEditor = () => {
+  const { id } = useParams();
   const [canvas, setCanvas] = useState({
     name: "",
   });
@@ -17,7 +19,64 @@ const SeatingEditor = () => {
     unavailableSeats: []
   });
   const [totalRows, setTotalRows] = useState(0);
-  const [layoutId, setLayoutId] = useState(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchSeatingPlan();
+    }
+  }, [id]);
+
+  const fetchSeatingPlan = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/${id}`);
+      if (response.data.statusCode === 200) {
+        const plan = response.data.data;
+        setCanvas({ name: plan.name });
+        
+        // Transform sections data to match component state structure
+        const transformedSections = plan.sections.map((section, index) => {
+          let startingRow = 0;
+          for (let i = 0; i < index; i++) {
+            startingRow += plan.sections[i].rows;
+          }
+          
+          return {
+            name: section.name,
+            rows: section.rows,
+            columns: section.columns,
+            price: section.price,
+            startingRow: startingRow,
+            unavailableSeats: section.unavailableSeats || [],
+            seats: Array.from(
+              { length: section.rows * section.columns },
+              (_, idx) => {
+                const row = String.fromCharCode(65 + startingRow + Math.floor(idx / section.columns));
+                const seatNum = (idx % section.columns) + 1;
+                const isUnavailable = section.unavailableSeats?.some(
+                  unavail => unavail.row === row && unavail.seats.includes(seatNum)
+                );
+                
+                return {
+                  row: row,
+                  seatNumber: seatNum,
+                  isAvailable: !isUnavailable,
+                  isVisible: true,
+                  isBooked: false,
+                  price: section.price,
+                }
+              }
+            )
+          };
+        });
+
+        setSections(transformedSections);
+        setTotalRows(transformedSections.reduce((acc, section) => acc + section.rows, 0));
+      }
+    } catch (error) {
+      console.error("Error fetching seating plan:", error);
+      alert("Failed to load seating plan");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,7 +92,6 @@ const SeatingEditor = () => {
   };
 
   const handleAddSection = () => {
-    // Validate section data
     if (!newSection.name || !newSection.rows || !newSection.columns || !newSection.price) {
       alert('Missing required section fields');
       return;
@@ -100,13 +158,11 @@ const SeatingEditor = () => {
         const rowLetter = String.fromCharCode(65 + section.startingRow + rowIndex);
         const seatNumber = seatIndex + 1;
         
-        // Toggle availability
         updatedSeats[seatArrayIndex] = {
           ...updatedSeats[seatArrayIndex],
           isAvailable: !updatedSeats[seatArrayIndex].isAvailable
         };
 
-        // Update unavailable seats array
         let unavailableSeats = section.unavailableSeats ? [...section.unavailableSeats] : [];
         const rowEntry = unavailableSeats.find(r => r.row === rowLetter);
 
@@ -141,13 +197,11 @@ const SeatingEditor = () => {
 
   const handleSavePlan = async () => {
     try {
-      // Validate input data
       if (!canvas.name) {
         alert('Please enter a name for the seating plan');
         return;
       }
 
-      // Transform data to match backend schema
       const seatingPlanData = {
         name: canvas.name.trim(),
         sections: sections.map(section => ({
@@ -159,15 +213,14 @@ const SeatingEditor = () => {
         }))
       };
 
-      if (layoutId) {
-        const response = await axios.put(`http://localhost:8000/api/v1/seating/seatingplans/${layoutId}`, seatingPlanData);
+      if (id) {
+        const response = await axios.put(`http://localhost:8000/api/v1/seating/seatingplans/${id}`, seatingPlanData);
         if (response.data.statusCode === 200) {
           alert(response.data.message);
         }
       } else {
         const response = await axios.post('http://localhost:8000/api/v1/seating/seatingplans', seatingPlanData);
         if (response.data.statusCode === 201) {
-          setLayoutId(response.data.data.id);
           alert(response.data.message);
         }
       }
@@ -196,80 +249,73 @@ const SeatingEditor = () => {
                   placeholder="Enter seating plan name"
                 />
               </div>
-              {layoutId && (
-                <div>
-                  <label className="text-sm font-medium">Plan ID: {layoutId}</label>
-                </div>
-              )}
               <Button 
                 className="w-full mt-4" 
                 onClick={handleSavePlan}
                 disabled={!canvas.name.trim()}
               >
-                {layoutId ? 'Update Seat Plan' : 'Save New Seat Plan'}
+                {id ? 'Update Seat Plan' : 'Save New Seat Plan'}
               </Button>
             </CardContent>
           </Card>
 
-          {layoutId && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Section</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Input
+                type="text"
+                name="name"
+                value={newSection.name}
+                onChange={handleSectionInputChange}
+                placeholder="Section Name"
+              />
+              <div>
+                <label className="text-sm font-medium">Price per Seat:</label>
                 <Input
-                  type="text"
-                  name="name"
-                  value={newSection.name}
+                  type="number"
+                  name="price"
+                  value={newSection.price}
                   onChange={handleSectionInputChange}
-                  placeholder="Section Name"
+                  placeholder="Price"
+                  min="0"
+                  step="0.01"
                 />
-                <div>
-                  <label className="text-sm font-medium">Price per Seat:</label>
-                  <Input
-                    type="number"
-                    name="price"
-                    value={newSection.price}
-                    onChange={handleSectionInputChange}
-                    placeholder="Price"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Number of Rows (A-Z):</label>
-                  <Input
-                    type="number"
-                    name="rows"
-                    value={newSection.rows}
-                    onChange={handleSectionInputChange}
-                    placeholder="Rows"
-                    min="1"
-                    max={26 - totalRows}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Seats in Each Row (1-50):</label>
-                  <Input
-                    type="number"
-                    name="columns"
-                    value={newSection.columns}
-                    onChange={handleSectionInputChange}
-                    placeholder="Seats Per Row"
-                    min="1"
-                    max="50"
-                  />
-                </div>
-                <Button
-                  onClick={handleAddSection}
-                  className="w-full"
-                  disabled={!newSection.name || newSection.rows < 1 || newSection.columns < 1 || newSection.price <= 0 || (totalRows + newSection.rows) > 26}
-                >
-                  Add Section
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+              <div>
+                <label className="text-sm font-medium">Number of Rows (A-Z):</label>
+                <Input
+                  type="number"
+                  name="rows"
+                  value={newSection.rows}
+                  onChange={handleSectionInputChange}
+                  placeholder="Rows"
+                  min="1"
+                  max={26 - totalRows}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Seats in Each Row (1-50):</label>
+                <Input
+                  type="number"
+                  name="columns"
+                  value={newSection.columns}
+                  onChange={handleSectionInputChange}
+                  placeholder="Seats Per Row"
+                  min="1"
+                  max="50"
+                />
+              </div>
+              <Button
+                onClick={handleAddSection}
+                className="w-full"
+                disabled={!newSection.name || newSection.rows < 1 || newSection.columns < 1 || newSection.price <= 0 || (totalRows + newSection.rows) > 26}
+              >
+                Add Section
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="bg-white border rounded-lg shadow-lg p-8">
@@ -307,7 +353,7 @@ const SeatingEditor = () => {
                                 : 'border-red-500 bg-red-100 hover:bg-red-200'
                             }`}
                             onClick={() => toggleSeatAvailability(sectionIndex, rowIndex, seatIndex)}
-                            title={`${String.fromCharCode(65 + section.startingRow + rowIndex)}${seatIndex + 1} - $${section.price} ${isAvailable ? '(Available)' : '(Unavailable)'}`}
+                            title={`${String.fromCharCode(65 + section.startingRow + rowIndex)}${seatIndex + 1} - ₹${section.price} ${isAvailable ? '(Available)' : '(Unavailable)'}`}
                           >
                             {seatIndex + 1}
                           </div>
