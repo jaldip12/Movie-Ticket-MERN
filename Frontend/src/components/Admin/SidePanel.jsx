@@ -1,57 +1,52 @@
-import React, { useState } from 'react';
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { LayoutGridIcon, FilmIcon, CalendarIcon, SofaIcon, TicketIcon, SettingsIcon, LogOutIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import {
+  LayoutGrid,
+  Film,
+  Calendar,
+  Sofa,
+  Ticket,
+  Settings,
+  LogOut,
+} from 'lucide-react';
 
-function SidePanel() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const NAV_ITEMS = [
+  { icon: LayoutGrid, label: 'Dashboard', path: '/admin' },
+  { icon: Film, label: 'Movies', path: '/admin/movies' },
+  { icon: Calendar, label: 'Bookings', path: '/admin/bookings' },
+  { icon: Sofa, label: 'Seating', path: '/admin/seating' },
+  { icon: Ticket, label: 'Shows', path: '/admin/shows' },
+  { icon: Settings, label: 'Settings', path: '/admin/settings' },
+];
 
+const SidePanel = () => {
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-64'} bg-gray-800 shadow-lg relative transition-all duration-300`}>
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-6 bg-gray-700 rounded-full p-1.5 text-gray-300 hover:text-yellow-400 z-10"
-      >
-        {isCollapsed ? <ChevronRightIcon size={16} /> : <ChevronLeftIcon size={16} />}
-      </button>
-
-      <div className="h-16 flex items-center justify-center border-b border-gray-700">
-        {!isCollapsed && <h1 className="text-2xl font-bold text-yellow-400">cinépolis</h1>}
-      </div>
-
-      <nav className="p-4">
-        {[
-          { icon: LayoutGridIcon, label: "Dashboard", path: "/admin" },
-          { icon: FilmIcon, label: "Movies", path: "/admin/movies" },
-          { icon: CalendarIcon, label: "Bookings", path: "/admin/bookings" },
-          { icon: SofaIcon, label: "Seating", path: "/admin/seating" },
-          { icon: TicketIcon, label: "Shows", path: "/admin/shows" },
-          { icon: SettingsIcon, label: "Settings", path: "/admin/settings" },
-        ].map(({ icon: Icon, label, path }) => (
+    <aside className="w-64 bg-gradient-to-b from-gray-900 to-gray-800 shadow-xl h-screen flex flex-col">
+      <nav className="p-4 flex-grow">
+        {NAV_ITEMS.map(({ icon: Icon, label, path }) => (
           <Link
             key={label}
             to={path}
-            className="flex items-center gap-3 p-3 rounded-md text-gray-300 hover:text-yellow-400 hover:bg-gray-700 transition-all duration-300"
-            title={isCollapsed ? label : ""}
+            className="flex items-center gap-3 p-3 rounded-md text-gray-300 hover:text-yellow-400 hover:bg-gray-700/50 transition-all duration-300"
           >
             <Icon className="h-5 w-5" />
-            {!isCollapsed && <span>{label}</span>}
+            <span>{label}</span>
           </Link>
         ))}
       </nav>
 
-      <div className={`absolute bottom-0 ${isCollapsed ? 'w-16' : 'w-64'} p-4`}>
-        <Button 
-          variant="outline" 
-          className="w-full flex items-center justify-center gap-2 bg-gray-700 text-gray-300 hover:text-yellow-400 hover:bg-gray-600 transition-colors duration-300"
-          title={isCollapsed ? "Logout" : ""}
+      {/* Logout Button */}
+      <div className="p-4 border-t border-gray-700">
+        <button
+          className="w-full flex items-center justify-center gap-3 bg-gray-700 text-gray-300 hover:text-yellow-400 hover:bg-gray-600 transition-all duration-300 rounded-md py-2"
+          aria-label="Log out"
         >
-          <LogOutIcon className="h-4 w-4" />
-          {!isCollapsed && <span>Log out</span>}
-        </Button>
+          <LogOut className="h-5 w-5" />
+          <span>Log out</span>
+        </button>
       </div>
     </aside>
   );
-}
+};
 
 export default SidePanel;

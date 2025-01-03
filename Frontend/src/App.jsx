@@ -15,6 +15,7 @@ import { NowShowing } from "./components/nowshowing/NowShowing";
 import { AdminPanel } from "./components/Admin/AdminPanel";
 import Billing from "./pages/Billing";
 import SeatingEditor from "./components/seatingCreation/SeatingEditor"
+import CreateShows from "./components/Admin/ShowCreate"
 function App() {
   return (
     <>        
@@ -26,6 +27,7 @@ function App() {
         <Route path="/admin" element={<AdminP />}>
           <Route index element={<AdminPanel />} />
           <Route path="seating" element={<Seats />} />
+          <Route path="shows" element={<CreateShows />} />
           <Route path="seating/edit/:id" element={<SeatingEditor />} />
 
           <Route path="movies" element={<NowShowing />} />
