@@ -1,7 +1,5 @@
-import mongoose from 'mongoose'
 import {asyncHandler} from '../utils/asynchandler.js'
 import {User} from '../models/user.model.js'
-import {ApiError} from '../utils/apierror.js'
 import {ApiResponse} from '../utils/apiresponce.js'
 
 

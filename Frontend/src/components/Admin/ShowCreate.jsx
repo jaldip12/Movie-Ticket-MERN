@@ -57,7 +57,7 @@ const ShowCreate = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/movies/shows', formData);
+      const response = await axios.post('http://localhost:8000/api/v1/shows', formData);
       
       if (response.data.statusCode === 201) {
         setSuccessMessage('Show created successfully!');
