@@ -16,6 +16,7 @@ import { AdminPanel } from "./components/Admin/AdminPanel";
 import Billing from "./pages/Billing";
 import SeatingEditor from "./components/seatingCreation/SeatingEditor"
 import ShowCreate from "./components/Admin/ShowCreate"
+import MovieDetailsPage from "./components/nowshowing/MovieDetailsPage"
 function App() {
   return (
     <>        
@@ -35,6 +36,7 @@ function App() {
         
         <Route path="/Movies" element={<Movies />} />
         <Route path="/Movies/:movieTitle" element={<Tickets />} />
+        <Route path="/Movies/:movieTitle/secondpage" element={<MovieDetailsPage />} />
         <Route path="/Movies/:movieTitle/billing" element={<Billing />} />
        
       </Routes>

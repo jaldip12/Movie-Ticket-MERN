@@ -55,7 +55,7 @@ function MovieCard({ movie, index }) {
   const navigate = useNavigate();
 
   const handleBookNow = () => {
-    navigate(`/Movies/${encodeURIComponent(movie.title)}`);
+    navigate(`/Movies/${encodeURIComponent(movie.title)}/secondpage`);
   };
 
   return (
