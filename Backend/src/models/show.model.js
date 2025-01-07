@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
 const showSchema = new mongoose.Schema({
-    movieId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Movie',
+    movieName: {
+        type: String,
         required: true
     },
     date: {
@@ -14,9 +13,8 @@ const showSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    seatingLayoutId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SeatingLayout',
+    seatingLayoutName: {
+        type: String,
         required: true
     }
 }, { timestamps: true });

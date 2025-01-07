@@ -4,17 +4,19 @@ import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apiresponce.js";
 
 const createShow = asyncHandler(async (req, res) => {
-    const { movieId, date, time, seatingLayoutId } = req.body;
+    const { movieName, date, time, seatingLayoutName } = req.body;
 
-    if (!movieId || !date || !time || !seatingLayoutId) {
+    if (!movieName || !date || !time || !seatingLayoutName) {
         throw new ApiError(400, "All fields are required");
+        
+        
     }
 
     const show = await Show.create({
-        movieId,
+        movieName,
         date,
         time,
-        seatingLayoutId
+        seatingLayoutName
     });
 
     return res.status(201).json(
@@ -23,9 +25,7 @@ const createShow = asyncHandler(async (req, res) => {
 });
 
 const getShows = asyncHandler(async (req, res) => {
-    const shows = await Show.find()
-        .populate('movieId')
-        .populate('seatingLayoutId');
+    const shows = await Show.find();
 
     return res.status(200).json(
         new ApiResponse(200, shows, "Shows fetched successfully")
@@ -33,15 +33,13 @@ const getShows = asyncHandler(async (req, res) => {
 });
 
 const getShowsByMovie = asyncHandler(async (req, res) => {
-    const { movieId } = req.params;
+    const { movieName } = req.params;
 
-    if (!movieId) {
-        throw new ApiError(400, "Movie ID is required");
+    if (!movieName) {
+        throw new ApiError(400, "Movie name is required");
     }
 
-    const shows = await Show.find({ movieId })
-        .populate('movieId')
-        .populate('seatingLayoutId');
+    const shows = await Show.find({ movieName });
 
     return res.status(200).json(
         new ApiResponse(200, shows, "Shows fetched successfully")

@@ -11,10 +11,10 @@ const ShowCreate = () => {
   const [seatingPlans, setSeatingPlans] = useState([]);
   
   const [formData, setFormData] = useState({
-    movieId: '',
+    movieName: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     time: '',
-    seatingLayoutId: ''
+    seatingLayoutName: ''
   });
 
   useEffect(() => {
@@ -62,10 +62,10 @@ const ShowCreate = () => {
       if (response.data.statusCode === 201) {
         setSuccessMessage('Show created successfully!');
         setFormData({
-          movieId: '',
+          movieName: '',
           date: format(new Date(), 'yyyy-MM-dd'),
           time: '',
-          seatingLayoutId: ''
+          seatingLayoutName: ''
         });
       }
     } catch (error) {
@@ -86,15 +86,15 @@ const ShowCreate = () => {
             <div>
               <label className="block mb-2">Movie</label>
               <select 
-                name="movieId"
-                value={formData.movieId}
+                name="movieName"
+                value={formData.movieName}
                 onChange={handleInputChange}
                 className="w-full p-2 border rounded"
                 required
               >
                 <option value="">Select a movie</option>
                 {Array.isArray(movies) && movies.map((movie) => (
-                  <option key={movie._id} value={movie._id}>
+                  <option key={movie._id} value={movie.title}>
                     {movie.title}
                   </option>
                 ))}
@@ -167,15 +167,15 @@ const ShowCreate = () => {
             <div>
               <label className="block mb-2">Seating Layout</label>
               <select
-                name="seatingLayoutId"
-                value={formData.seatingLayoutId}
+                name="seatingLayoutName"
+                value={formData.seatingLayoutName}
                 onChange={handleInputChange}
                 className="w-full p-2 border rounded"
                 required
               >
                 <option value="">Select a seating layout</option>
                 {Array.isArray(seatingPlans) && seatingPlans.map((plan) => (
-                  <option key={plan._id} value={plan._id}>
+                  <option key={plan._id} value={plan.name}>
                     {plan.name}
                   </option>
                 ))}
