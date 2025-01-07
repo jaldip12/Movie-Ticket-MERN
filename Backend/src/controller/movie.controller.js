@@ -45,4 +45,18 @@ const getallmovies = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, movies, "Movies retrieved successfully"));
 });
 
-export { addmovie,getmovies,getallmovies };
+const getMovieTitles = asyncHandler(async (req, res) => {
+    // Find all movies and only select the title field, excluding _id
+    const movies = await Movie.find().select('title -_id');
+
+    if (!movies || movies.length === 0) {
+        return res.status(404).json(new ApiResponse(404, null, "No movies found"));
+    }
+
+    // Extract just the titles into an array
+    const movieTitles = movies.map(movie => movie.title);
+
+    res.status(200).json(new ApiResponse(200, movieTitles, "Movie titles retrieved successfully"));
+});
+
+export { addmovie, getmovies, getallmovies, getMovieTitles };
