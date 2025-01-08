@@ -33,13 +33,17 @@ const getShows = asyncHandler(async (req, res) => {
 });
 
 const getShowsByMovie = asyncHandler(async (req, res) => {
-    const { movieName } = req.params;
+    const { movieTitle } = req.params;
 
-    if (!movieName) {
-        throw new ApiError(400, "Movie name is required");
+    if (!movieTitle) {
+        throw new ApiError(400, "Movie title is required");
     }
 
-    const shows = await Show.find({ movieName });
+    const shows = await Show.find({ movieName: { $regex: movieTitle, $options: 'i' } });
+
+    if (!shows || shows.length === 0) {
+        throw new ApiError(404, "No shows found for this movie");
+    }
 
     return res.status(200).json(
         new ApiResponse(200, shows, "Shows fetched successfully")

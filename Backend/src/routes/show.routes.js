@@ -5,6 +5,6 @@ const router = Router();
 
 router.route("/").post(createShow);
 router.route("/").get(getShows);
-router.route("/:movieId").get(getShowsByMovie);
+router.route("/:movieTitle").get(getShowsByMovie);
 
 export default router;

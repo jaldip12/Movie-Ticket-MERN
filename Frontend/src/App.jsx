@@ -9,14 +9,14 @@ import Home from "./pages/Home.jsx";
 import Login from "../src/components/login/login";
 import AdminP from "./pages/AdminP";
 import Seats from "./pages/Seats";
-import Tickets from "./pages/Tickets";
+import TicketBooking from "./pages/TicketBooking";
 import Movies from "./components/Movies/Movies";
 import { NowShowing } from "./components/nowshowing/NowShowing";
 import { AdminPanel } from "./components/Admin/AdminPanel";
 import Billing from "./pages/Billing";
 import SeatingEditor from "./components/seatingCreation/SeatingEditor"
 import ShowCreate from "./components/Admin/ShowCreate"
-import MovieDetailsPage from "./components/nowshowing/MovieDetailsPage"
+import MovieDetailsPage from "./pages/MovieDetailsPage"
 function App() {
   return (
     <>        
@@ -35,7 +35,7 @@ function App() {
         </Route>
         
         <Route path="/Movies" element={<Movies />} />
-        <Route path="/Movies/:movieTitle" element={<Tickets />} />
+        <Route path="/Movies/:movieTitle" element={<TicketBooking />} />
         <Route path="/Movies/:movieTitle/secondpage" element={<MovieDetailsPage />} />
         <Route path="/Movies/:movieTitle/billing" element={<Billing />} />
        
