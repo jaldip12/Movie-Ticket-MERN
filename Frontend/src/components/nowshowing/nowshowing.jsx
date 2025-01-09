@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Star, Film, Heart } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -11,66 +11,97 @@ import { useNavigate } from "react-router-dom"
 
 export function NowShowing() {
   const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
+        setLoading(true)
         const response = await axios.get("http://localhost:8000/api/v1/movies/getmovies")
         if (response.data.statusCode === 200) {
           setMovies(response.data.data)
         } else {
-          console.error("Failed to fetch movies:", response.data.message)
+          setError("Failed to fetch movies")
         }
       } catch (error) {
+        setError("Error loading movies")
         console.error("Error fetching movies:", error)
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchMovies()
   }, [])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+        <p className="text-red-400 text-xl">{error}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-800 py-16">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-12 text-center text-yellow-400">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl md:text-5xl font-bold mb-12 text-center text-yellow-400"
+        >
           Now Showing
-        </h1>
+        </motion.h1>
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {movies.map((movie, index) => (
-            <MovieCard key={movie._id} movie={movie} index={index} />
-          ))}
+          <AnimatePresence>
+            {movies.map((movie, index) => (
+              <MovieCard key={movie._id} movie={movie} index={index} />
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>
-  );
+  )
 }
 
 function MovieCard({ movie, index }) {
-  const [isLiked, setIsLiked] = useState(false);
-  const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false)
+  const navigate = useNavigate()
 
   const handleBookNow = () => {
-    navigate(`/Movies/${encodeURIComponent(movie.title)}/secondpage`);
-  };
+    navigate(`/Movies/${encodeURIComponent(movie.title)}`)
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ y: -5 }}
     >
-      <Card className="overflow-hidden group cursor-pointer transform transition-all duration-300 hover:shadow-2xl bg-gray-800 rounded-xl shadow-lg border border-gray-700 hover:scale-105">
+      <Card className="overflow-hidden group cursor-pointer transform transition-all duration-300 hover:shadow-2xl bg-gray-800 rounded-xl shadow-lg border border-gray-700">
         <div className="relative aspect-[2/3]">
           <img
             src={movie.poster}
             alt={`${movie.title} poster`}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-t-xl"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
@@ -81,7 +112,10 @@ function MovieCard({ movie, index }) {
               variant="ghost"
               size="icon"
               className="text-gray-400 hover:text-yellow-500 transition-all"
-              onClick={() => setIsLiked(!isLiked)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsLiked(!isLiked)
+              }}
               title={isLiked ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart className={`w-6 h-6 ${isLiked ? 'fill-current text-yellow-500' : ''}`} />
@@ -110,5 +144,5 @@ function MovieCard({ movie, index }) {
         </CardContent>
       </Card>
     </motion.div>
-  );
+  )
 }

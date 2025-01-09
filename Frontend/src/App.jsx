@@ -9,7 +9,6 @@ import Home from "./pages/Home.jsx";
 import Login from "../src/components/login/login";
 import AdminP from "./pages/AdminP";
 import Seats from "./pages/Seats";
-import TicketBooking from "./pages/TicketBooking";
 import Movies from "./components/Movies/Movies";
 import { NowShowing } from "./components/nowshowing/NowShowing";
 import { AdminPanel } from "./components/Admin/AdminPanel";
@@ -35,8 +34,7 @@ function App() {
         </Route>
         
         <Route path="/Movies" element={<Movies />} />
-        <Route path="/Movies/:movieTitle" element={<TicketBooking />} />
-        <Route path="/Movies/:movieTitle/secondpage" element={<MovieDetailsPage />} />
+        <Route path="/Movies/:movieTitle" element={<MovieDetailsPage />} />
         <Route path="/Movies/:movieTitle/billing" element={<Billing />} />
        
       </Routes>

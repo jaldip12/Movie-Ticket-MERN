@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { FaTicketAlt, FaClock, FaCalendar } from "react-icons/fa";
 
 const ShowDetails = () => {
   const [shows, setShows] = useState([]);
@@ -23,7 +21,6 @@ const ShowDetails = () => {
       setError(null);
 
       try {
-        // Fetch shows based on the movie title
         const response = await axios.get(
           `http://localhost:8000/api/v1/shows/search?title=${movieTitle}`
         );
@@ -52,10 +49,22 @@ const ShowDetails = () => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "short",
-      month: "short",
       day: "numeric",
+      month: "short",
     });
   };
+
+  const groupedByDate = shows.reduce((acc, show) => {
+    const date = formatDate(show.date);
+    if (!acc[date]) {
+      acc[date] = {};
+    }
+    if (!acc[date][show.cinemaName]) {
+      acc[date][show.cinemaName] = [];
+    }
+    acc[date][show.cinemaName].push(show);
+    return acc;
+  }, {});
 
   if (loading)
     return (
@@ -71,35 +80,38 @@ const ShowDetails = () => {
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-6">{movieTitle}</h2>
 
-      <div className="grid grid-cols-1 gap-6">
-        {shows.map((show) => (
-          <div key={show._id} className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <FaCalendar className="text-gray-500" />
-                <span className="font-semibold">{formatDate(show.date)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FaClock className="text-gray-500" />
-                <span>{show.time}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600">Screen: {show.seatingLayoutName}</p>
-              </div>
-              <Button
-                onClick={() => handleBooking(show._id)}
-                className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md"
+      {Object.entries(groupedByDate).map(([date, cinemas]) => (
+        <div key={date} className="mb-8">
+          {/* Date Header */}
+          <div className="text-xl font-semibold text-gray-700 mb-4">{date}</div>
+          <div className="space-y-6">
+            {Object.entries(cinemas).map(([cinemaName, shows]) => (
+              <div
+                key={cinemaName}
+                className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
               >
-                <FaTicketAlt className="mr-2" />
-                Book Tickets
-              </Button>
-            </div>
+                {/* Cinema Name */}
+                {/* <div className="text-lg font-bold mb-4 text-gray-800">
+                  {cinemaName}
+                </div> */}
+
+                {/* Show Timings */}
+                <div className="flex flex-wrap gap-4">
+                  {shows.map((show) => (
+                    <button
+                      key={show._id}
+                      onClick={() => handleBooking(show._id)}
+                      className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700"
+                    >
+                      {show.time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
       {shows.length === 0 && (
         <div className="text-center p-8 text-gray-500">
