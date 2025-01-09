@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FaTicketAlt } from "react-icons/fa";
+import { FaTicketAlt, FaClock, FaCalendar } from "react-icons/fa";
 
 const ShowDetails = () => {
   const [shows, setShows] = useState([]);
@@ -10,82 +10,100 @@ const ShowDetails = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { movieTitle } = useParams();
-  console.log(movieTitle);
+
   useEffect(() => {
-    const fetchShowsByMovie = async (movieTitle) => {
+    const fetchShowsByMovie = async () => {
+      if (!movieTitle?.trim()) {
+        setError("Invalid movie title");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       try {
-        const decodedTitle = decodeURIComponent(movieTitle); // Ensure title is properly decoded for the request
+        // Fetch shows based on the movie title
         const response = await axios.get(
-          `http://localhost:8000/api/v1/shows/${decodedTitle}`
+          `http://localhost:8000/api/v1/shows/search?title=${movieTitle}`
         );
 
-        if (response.status === 200) {
+        if (response.data?.data) {
           setShows(response.data.data);
         } else {
-          throw new Error(`Failed to fetch shows. Status code: ${response.status}`);
+          setShows([]);
         }
       } catch (err) {
-        setError(err.message || "An error occurred while fetching shows.");
+        console.error("Error fetching shows:", err);
+        setError(err.response?.data?.message || "Failed to fetch shows");
+        setShows([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (movieTitle) {
-      fetchShowsByMovie(movieTitle);
-    } else {
-      setError("Invalid movie title.");
-      setLoading(false);
-    }
+    fetchShowsByMovie();
   }, [movieTitle]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-xl font-bold">Loading shows...</p>
-      </div>
-    );
-  }
+  const handleBooking = (showId) => {
+    navigate(`/booking/${showId}`);
+  };
 
-  if (error) {
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (loading)
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500 text-lg font-semibold">{error}</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
-  }
+
+  if (error)
+    return <div className="text-center p-8 text-red-500">{error}</div>;
 
   return (
-    <div className="w-full px-4 py-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-center">Available Shows for "{movieTitle}"</h1>
-      {shows.length > 0 ? (
-        <div className="space-y-4">
-          {shows.map((show) => (
-            <div
-              key={show.id}
-              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
-            >
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">{movieTitle}</h2>
+
+      <div className="grid grid-cols-1 gap-6">
+        {shows.map((show) => (
+          <div key={show._id} className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <FaCalendar className="text-gray-500" />
+                <span className="font-semibold">{formatDate(show.date)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaClock className="text-gray-500" />
+                <span>{show.time}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">{show.movieTitle}</h2>
-                <p className="text-gray-600">Cinema: {show.cinemaName}</p>
-                <p className="text-gray-600">Time: {show.showTime}</p>
+                <p className="text-gray-600">Screen: {show.seatingLayoutName}</p>
               </div>
               <Button
-                onClick={() => navigate(`/shows/${show.id}/book`)}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition flex items-center"
+                onClick={() => handleBooking(show._id)}
+                className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md"
               >
                 <FaTicketAlt className="mr-2" />
-                Book Now
+                Book Tickets
               </Button>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex justify-center items-center">
-          <p className="text-gray-600 text-lg font-medium">No shows available for this movie.</p>
+          </div>
+        ))}
+      </div>
+
+      {shows.length === 0 && (
+        <div className="text-center p-8 text-gray-500">
+          No shows available for this movie
         </div>
       )}
     </div>
