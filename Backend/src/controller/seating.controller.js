@@ -207,11 +207,38 @@ const getSeatingPlanById = asyncHandler(async (req, res) => {
         new ApiResponse(200, seatingPlan, "Seating plan retrieved successfully")
     );
 });
+const getSeatingPlanByName = asyncHandler(async (req, res) => {
+    const { name } = req.params;
+
+    // Validate input to ensure `name` is not empty
+    if (!name || typeof name !== "string") {
+        return res.status(400).json(
+            new ApiResponse(400, null, "Invalid name parameter.")
+        );
+    }
+
+    // Fetch seating plan by name
+    const seatingPlan = await Seating.findOne({ name });
+
+    if (!seatingPlan) {
+        return res.status(404).json(
+            new ApiResponse(404, null, "Seating plan not found")
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, seatingPlan, "Seating plan retrieved successfully")
+    );
+});
+
+export default getSeatingPlanByName;
+
 
 export {
     createSeatingPlan,
     updateSeatingPlan,
     deleteSeatingPlan,
     getAllSeatingPlans,
-    getSeatingPlanById
+    getSeatingPlanById,
+    getSeatingPlanByName
 };

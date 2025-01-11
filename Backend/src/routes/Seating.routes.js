@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createSeatingPlan, updateSeatingPlan, deleteSeatingPlan, getAllSeatingPlans, getSeatingPlanById } from "../controller/seating.controller.js";
+import { createSeatingPlan, updateSeatingPlan, deleteSeatingPlan, getAllSeatingPlans, getSeatingPlanByName } from "../controller/seating.controller.js";
 
 const routerS = Router();
 
@@ -10,6 +10,9 @@ routerS.route("/seatingplans")
 routerS.route("/seatingplans/:id")
     .put(updateSeatingPlan)
     .delete(deleteSeatingPlan)
-    .get(getSeatingPlanById);
+    // .get(getSeatingPlanById);
+
+routerS.route("/seatingplans/:name")
+    .get(getSeatingPlanByName);
 
 export default routerS;

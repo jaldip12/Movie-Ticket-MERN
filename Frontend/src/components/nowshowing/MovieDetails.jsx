@@ -16,6 +16,8 @@ const MovieDetailsPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedShow, setSelectedShow] = useState(null); // Added to store the selected show for seating layout
+  const [seatingLayout, setSeatingLayout] = useState(null); // Added new state for seating layout
 
   useEffect(() => {
     const fetchAndSetMovie = async () => {
@@ -90,8 +92,29 @@ const MovieDetailsPage = () => {
     navigate(-1);
   };
 
-  const handleBooking = (showId) => {
-    navigate(`/booking/${showId}`);
+  // Add this function to fetch seating layout when a show is selected
+  const fetchSeatingLayout = async (layoutName) => {
+    try {
+      console.log('Fetching seating layout:', layoutName);
+      
+      const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/${layoutName}`);
+      console.log(response.data);
+      
+      if (response.data.statusCode === 200) {
+        setSeatingLayout(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching seating layout:', error);
+    }
+  };
+
+  // Update handleBooking function to fetch seating layout
+  const handleBooking = async (showId) => {
+    const selectedShow = shows.find(show => show._id === showId);
+    if (selectedShow) {
+      setSelectedShow(selectedShow);
+      await fetchSeatingLayout(selectedShow.seatingLayoutName);
+    }
   };
 
   if (loading) {
@@ -225,6 +248,58 @@ const MovieDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Seating Layout */}
+      {selectedShow && seatingLayout && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-white mb-6">Seating Layout</h2>
+          <div className="bg-gray-800 rounded-lg p-8">
+            {seatingLayout.sections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="mb-16">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{section.name}</h3>
+                    <p className="text-sm text-gray-400">Price: ₹{section.price}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {Array.from({ length: section.rows }).map((_, rowIndex) => (
+                    <div key={rowIndex} className="flex items-center gap-2">
+                      <span className="w-8 text-right text-gray-400 mr-4">
+                        {String.fromCharCode(65 + rowIndex)}
+                      </span>
+                      {Array.from({ length: section.columns }).map((_, seatIndex) => {
+                        const seatNumber = seatIndex + 1;
+                        const rowLetter = String.fromCharCode(65 + rowIndex);
+                        const isUnavailable = section.unavailableSeats?.some(
+                          seat => seat.row === rowLetter && seat.seats.includes(seatNumber)
+                        );
+                        
+                        return (
+                          <div
+                            key={seatIndex}
+                            className={`w-8 h-8 border flex items-center justify-center text-xs
+                              ${isUnavailable 
+                                ? 'border-red-500 bg-red-100 text-red-800 cursor-not-allowed' 
+                                : 'border-green-500 text-green-800 cursor-pointer hover:bg-green-200'
+                              }`}
+                            title={`${rowLetter}${seatNumber} - ₹${section.price}`}
+                          >
+                            {seatNumber}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="w-full h-16 bg-gray-900 rounded-b-lg flex items-center justify-center text-white text-xl font-bold mt-12">
+              SCREEN
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trailer Modal */}
       {showTrailer && movie.trailerUrl && (
