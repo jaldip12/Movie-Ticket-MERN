@@ -11,7 +11,7 @@ export function Header() {
           className="flex items-center text-yellow-400 transition-transform hover:scale-105 duration-300"
           prefetch={false}
         >
-          <span className="text-3xl font-bold tracking-wider">cinépolis</span>
+          <span className="text-3xl font-bold tracking-wider">Jaldip </span>
         </Link>
         
         {/* Navigation Links */}
