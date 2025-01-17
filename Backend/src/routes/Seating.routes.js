@@ -12,7 +12,7 @@ routerS.route("/seatingplans/:id")
     .delete(deleteSeatingPlan)
      .get(getSeatingPlanById);
 
-routerS.route("/seatingplans/:name")
+routerS.route("/seatingplans/name/:name")
     .get(getSeatingPlanByName);
 
 export default routerS;
