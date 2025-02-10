@@ -24,6 +24,7 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
     "axios": "^1.7.9",
+    "caniuse-lite": "^1.0.30001699",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.5.1",
     "cloudinary-react": "^1.8.1",
