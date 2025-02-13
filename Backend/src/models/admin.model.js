@@ -34,10 +34,6 @@ const AdminSchema = new Schema({
         timestamps: true
 });
 
-export const Admin = mongoose.model("Admin", AdminSchema)
+const Admin = mongoose.model("Admin", AdminSchema);
 
-
-
-
-
-
+export default Admin;
