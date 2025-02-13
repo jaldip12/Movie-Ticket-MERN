@@ -1,18 +1,20 @@
 import { Router } from "express";
 import { createSeatingPlan, updateSeatingPlan, deleteSeatingPlan, getAllSeatingPlans,getSeatingPlanById, getSeatingPlanByName } from "../controller/seating.controller.js";
+import { isAdmin } from "../utils/helper.js";
 
-const routerS = Router();
+const router = Router();
 
-routerS.route("/seatingplans")
-    .post(createSeatingPlan)
-    .get(getAllSeatingPlans);
 
-routerS.route("/seatingplans/:id")
-    .put(updateSeatingPlan)
-    .delete(deleteSeatingPlan)
-     .get(getSeatingPlanById);
+router.post("/seatingplans",isAdmin, createSeatingPlan);
 
-routerS.route("/seatingplans/name/:name")
-    .get(getSeatingPlanByName);
+router.get("/seatingplans",isAdmin, getAllSeatingPlans);
 
-export default routerS;
+router.put("/seatingplans/:id", isAdmin, updateSeatingPlan);
+
+router.delete("/seatingplans/:id", isAdmin, deleteSeatingPlan);
+
+router.get("/seatingplans/:id", getSeatingPlanById);
+
+router.get("/seatingplans/name/:name", getSeatingPlanByName);
+
+export default router;

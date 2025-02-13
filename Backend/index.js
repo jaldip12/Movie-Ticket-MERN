@@ -3,9 +3,7 @@ import connectDB from "./src/db/index.js";
 import dotenv from "dotenv"
 import { exec } from 'child_process';
 
-dotenv.config({
-    path: './.env'
-})
+dotenv.config();
 
 // Kill process occupying port 8000 (for Windows)
 exec('netstat -ano | findstr :8000', (err, stdout) => {

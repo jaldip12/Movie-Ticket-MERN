@@ -1,14 +1,17 @@
 import { Router } from "express";
 import { addmovie,getmovies,getMovieTitles,getMovieByTitle } from "../controller/movie.controller.js";
+import { isAdmin } from "../utils/helper.js";
 
-const routerM = Router();
+const router = Router();
 
-routerM.route("/addmovie").post(addmovie)
 
-routerM.route("/getmovies").get(getmovies)
+router.post("/addmovie",isAdmin, addmovie);
 
-routerM.route("/getmovietitles").get(getMovieTitles)
+router.get("/getmovies", getmovies);
 
-routerM.route("/getmoviebytitle/:movieTitle").get(getMovieByTitle)
+router.get("/getmovietitles", getMovieTitles);
 
-export default routerM;
+router.get("/getmoviebytitle/:movieTitle", getMovieByTitle);
+
+
+export default router;
