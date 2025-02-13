@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import axios from 'axios';
 import SidePanel from './SidePanel';
@@ -6,7 +6,6 @@ import SidePanel from './SidePanel';
 const ShowCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [movies, setMovies] = useState([]);
   const [seatingPlans, setSeatingPlans] = useState([]);
   
