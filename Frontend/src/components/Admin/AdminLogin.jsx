@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 
@@ -27,7 +27,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/v1/users/login",
+        "http://localhost:8000/api/v1/admin/login",
         formData
       );
 
@@ -98,16 +98,6 @@ export default function Login() {
           >
             Login
           </Button>
-
-          <div className="text-center text-gray-400">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-yellow-500 hover:text-yellow-400 underline transition-colors"
-            >
-              Sign Up
-            </Link>
-          </div>
         </form>
       </motion.div>
     </div>

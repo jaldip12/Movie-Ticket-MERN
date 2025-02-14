@@ -6,9 +6,9 @@ import {ApiResponse} from '../utils/apiresponce.js';
 const createAdmin = async (req, res) => {
 
     
-        const { username, email, password } = req.body;
+        const { username, email, password,number } = req.body;
         try {  
-        if (!username ||!email ||!password) {
+        if (!username ||!email ||!password || !number) {
             return res.status(400).json(new ApiResponse(400, null, "All fields are required"));
         }
         
@@ -20,10 +20,12 @@ const createAdmin = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
-        const newAdmin = new Admin({ username, email, password: hashedPassword });
+        const newAdmin = new Admin({ username, email, password: hashedPassword , number });
         await newAdmin.save();
         return res.status(201).json(new ApiResponse(201, newAdmin, "Admin created successfully"));
     } catch (error) {
+        console.log(error);
+        
         return res.status(500).json(new ApiResponse(500, null, "Server Error"));
         
     }

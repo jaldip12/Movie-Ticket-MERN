@@ -9,7 +9,6 @@ import {
   Sofa,
   Ticket,
   Settings,
-  LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -121,19 +120,7 @@ const SidePanel = () => {
           `}
           aria-label="Log out"
         >
-          <LogOut className="h-5 w-5 min-w-[1.25rem]" />
-          <span
-            className={`
-              transition-all duration-300
-              ${
-                expanded
-                  ? "opacity-100 w-auto"
-                  : "opacity-0 w-0 overflow-hidden"
-              }
-            `}
-          >
-            Log out
-          </span>
+          
         </motion.button>
       </div>
     </motion.aside>
