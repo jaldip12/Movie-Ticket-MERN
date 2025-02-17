@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { AdminContext } from "@/context/AdminContext";
 import axios from "axios";
 
-export default function Login() {
+export default function AdminLogin() {
+  const { setAdmininfo } = useContext(AdminContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if already logged in
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      navigate("/admin");
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -21,19 +32,23 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const response = await axios.post(
         "http://localhost:8000/api/v1/admin/login",
-        formData
+        {
+          email: e.target.email.value,
+          password: e.target.password.value,
+        }
       );
 
       if (response.data.statusCode === 200) {
-        localStorage.setItem("userToken", response.data.data.token);
-        navigate("/"); // Navigate to user dashboard
+        localStorage.setItem("adminToken", response.data.data.token);
+        setAdmininfo(response.data.data);
+        navigate("/admin");
       }
     } catch (error) {
       setError(
@@ -50,7 +65,7 @@ export default function Login() {
         transition={{ duration: 0.6 }}
         className="bg-gray-900 p-8 rounded-xl shadow-xl w-full max-w-md"
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6">
           <h1 className="text-3xl font-bold text-center text-yellow-500">
             Welcome Back
           </h1>

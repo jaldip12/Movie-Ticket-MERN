@@ -2,6 +2,7 @@ import Admin from '../models/admin.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {ApiResponse} from '../utils/apiresponce.js';
+import { request } from 'express';
 
 const createAdmin = async (req, res) => {
 
@@ -33,7 +34,8 @@ const createAdmin = async (req, res) => {
 
 const getAdmin = async (req, res) => {
     const { email, password} = req.body;
-
+  console.log(req.body);
+  
     try {
         const admin = await Admin.findOne({ email: email });
         if (!admin) {
@@ -52,6 +54,8 @@ const getAdmin = async (req, res) => {
             sameSite: "None",
             maxAge: 3 * 24 * 60 * 60 * 1000,
             };
+            console.log(token, options);
+            
         res.cookie("token", token, options);
 
         return res.status(200).json(new ApiResponse(200, { token }, "Login successful"));
@@ -80,5 +84,20 @@ const logout = async (req, res) => {
     }
     };
 
-export { createAdmin, getAdmin, logout };
+const pingAdmin= async (req, res) => {
+   try{
+       const adminId= req.admin._id;
+       const admin= await Admin.findById(adminId);
+       if(!admin){
+           return res.status(401).json(new ApiResponse(401, null, "Admin not found"));
+       }
+       res.status(200).json(new ApiResponse(200, admin, "Ping successful"));
+   }catch(e){
+    res.status(500).json(new ApiResponse(500, null, "Server Error"));
+
+   }
+
+}
+
+export { createAdmin, getAdmin, logout,pingAdmin };
 
