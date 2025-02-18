@@ -1,15 +1,19 @@
 import Container from "../ui/Container";
+import { useContext } from "react";
+import {useNavigate } from "react-router"
 import { Logo } from "../UI/Logo";
-
+import { userContext} from "../../context/userContext.jsx"
 export default function AdminHeader() {
-    const handleLogout = () => {
-        // Clear user data from localStorage or cookies
-        localStorage.removeItem("authToken"); // Replace "authToken" with your token key
 
-        // Redirect to login page
-        window.location.href = "/login"; // Update the path based on your app's login route
-    };
+    const { logout } = useContext(userContext);
+    const navigate = useNavigate();
 
+    async function handleLogout(){
+        const res = await logout();
+        if(!res){
+            navigate("/auth/login");
+        }
+    }
     return (
         <header className="w-[100vw] ">
             <Container classes={"border-0 rounded-none px-5 py-4 flex justify-between items-center !bg-inherit"}>

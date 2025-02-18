@@ -44,7 +44,7 @@ const registeruser = asyncHandler(async (req, res) => {
 
     try {
       if (role == "user") {
-        const city = req.body;
+        const {city} = req.body;
         if (!city) {
           return res
             .status(400)
@@ -55,10 +55,10 @@ const registeruser = asyncHandler(async (req, res) => {
           city
         })
         let client = await newclient.save();
-        user = { ...user.toObject(), client };
+        user = { ...user.toObject(), ...client.toObject() };
       }
     } catch (error) {
-      console.log("1>>>>>",error);
+      console.log(error);
       
       return res.status(500).json(new ApiResponse(500, "Server Error", false));
     }
@@ -68,7 +68,7 @@ const registeruser = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(200, user, "User created successfully"));
   } catch (error) {
-    console.log("1>>>>>",error);
+    console.log(error);
     
     return res.status(500).json(new ApiResponse(500, "Server Error", false));
   }
@@ -104,7 +104,7 @@ const getUser = async (req, res) => {
       maxAge: 259200000,
     };
     res.cookie("token", token, options);
-    console.log(token);
+    console.log("token",token);
     
     // Respond with a 200 status and success message
     res.status(200).json(new ApiResponse(200, user.role , true)); // Corrected the response format

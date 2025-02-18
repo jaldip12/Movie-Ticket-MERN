@@ -31,7 +31,6 @@ export default function Login() {
         formData
       );
     console.log(response.data);
-    
       if (response.data.statusCode === 200) {
         if(response.data.data === "admin"){
           navigate("/admin");
@@ -104,7 +103,7 @@ export default function Login() {
           </Button>
 
           <div className="text-center text-gray-400">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               to="/signup"
               className="font-medium text-yellow-500 hover:text-yellow-400 underline transition-colors"

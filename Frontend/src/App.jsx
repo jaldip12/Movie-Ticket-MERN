@@ -14,11 +14,10 @@ import ShowCreate from "./components/Admin/ShowCreate";
 import MovieDetailsPage from "./pages/MovieDetailsPage";
 // import AdminLogin from "./components/Admin/AdminLogin";
 import AdminLayout from "./components/Admin/AdminLayout";
-import AdminContextProvider from "./context/AdminContextProvider";
-
+import UserContextProvider from "./context/userContextProvider";
 function App() {
   return (
-    <AdminContextProvider>
+    <UserContextProvider>
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -54,7 +53,7 @@ function App() {
           
         </Routes>
       </Router>
-    </AdminContextProvider>
+    </UserContextProvider>
   );
 }
 

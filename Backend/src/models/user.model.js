@@ -21,8 +21,7 @@ const UserSchema = new Schema({
     },
     number:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     },
     gender:{
         type:String,
