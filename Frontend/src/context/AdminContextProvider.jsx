@@ -7,11 +7,9 @@ export default function AdminContextProvider({ children }) {
 
     const handlePingAdmin = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/api/v1/admin/pingAdmin", {
-                withCredentials: true,
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-                }
+            const response = await axios.get("http://localhost:8000/api/v1/user/ping", {
+                withCredentials: true
+                
             });
             
             if (response.data.statusCode === 200) {
@@ -27,7 +25,7 @@ export default function AdminContextProvider({ children }) {
 
     const handleLogout = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/api/v1/admin/logout", {
+            const response = await axios.get("http://localhost:8000/api/v1/user/logout", {
                 withCredentials: true
             });
             if (response.status === 200) {
@@ -42,12 +40,15 @@ export default function AdminContextProvider({ children }) {
         }
     };
 
+    const ctxvalue={
+        admininfo:admininfo,
+        setAdmininfo:setAdmininfo,
+        handlePingAdmin:handlePingAdmin,
+        handleLogout:handleLogout
+    }
     return (
         <AdminContext.Provider value={{
-            admininfo,
-            setAdmininfo,
-            handlePingAdmin,
-            handleLogout
+            ctxvalue
         }}>
             {children}
         </AdminContext.Provider>

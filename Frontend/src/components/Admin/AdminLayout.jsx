@@ -7,25 +7,13 @@ export default function AdminLayout() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const verifyAdmin = async () => {
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                navigate('/admin/login');
-                return;
-            }
-
-            try {
-                const isValid = await handlePingAdmin();
-                if (!isValid) {
-                    navigate('/admin/login');
-                }
-            } catch (error) {
-                console.error("Admin verification failed:", error);
-                navigate('/admin/login');
+        const checkAdminStatus = async () => {
+            const isAdmin = await handlePingAdmin();
+            if (!isAdmin) {
+                navigate("/auth/login"); // Redirect to login if not an admin
             }
         };
-
-        verifyAdmin();
+        checkAdminStatus();
     }, [handlePingAdmin, navigate]);
 
     return <Outlet />;

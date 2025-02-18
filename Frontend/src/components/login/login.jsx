@@ -30,12 +30,16 @@ export default function Login() {
         "http://localhost:8000/api/v1/users/login",
         formData
       );
-
+    console.log(response.data);
+    
       if (response.data.statusCode === 200) {
-        localStorage.setItem("userToken", response.data.data.token);
-        navigate("/"); // Navigate to user dashboard
+        if(response.data.data === "admin"){
+          navigate("/admin");
       }
-    } catch (error) {
+        else{
+          navigate("/");
+        }
+    } }catch (error) {
       setError(
         error.response?.data?.message || "Login failed. Please try again."
       );

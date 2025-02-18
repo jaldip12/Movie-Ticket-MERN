@@ -36,7 +36,6 @@ import userrouter from "./src/routes/user.routes.js";
 import movierouter from "./src/routes/movie.routes.js";
 import seatingrouter from "./src/routes/Seating.routes.js";
 import showrouter from "./src/routes/show.routes.js";
-import AdminRouter from "./src/routes/admin.routes.js";
 
 app.get("/", (req, res) => {
   res.send("Hello from the server!");
@@ -47,6 +46,5 @@ app.use("/api/v1/users",userrouter)
 app.use("/api/v1/movies",movierouter)
 app.use("/api/v1/seating", seatingrouter)
 app.use("/api/v1/shows", showrouter)
-app.use("/api/v1/admin", AdminRouter);
 
 export { app };

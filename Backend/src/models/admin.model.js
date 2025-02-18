@@ -1,32 +1,20 @@
 import mongoose, {Schema} from "mongoose";
 
 const AdminSchema = new Schema({
-    username:{
-        type:String,
-        required:true
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        lowercase:true
-    },
-    password:{
-        type:String,
-        required:true
-    },
-    role:{
-        type:String,
-        default:"Admin"
-    },
-    number:{
-        type:String,
-        required:true
-    },
+
     lastLogin:{
         type:Date,
         default:Date.now()
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    }, 
     refreshToken:{
         type:String
     }},

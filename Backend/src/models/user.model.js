@@ -24,21 +24,14 @@ const UserSchema = new Schema({
         required:true,
         unique:true
     },
-    city:{
-        type:String,
-        required:true,
-    },
     gender:{
         type:String,
         required:true,
         enum:["male", "female", "other"]
     },
-    bookings:{
-        type:Array,
-        default:[],
-    },
     role:{
         type:String,
+        enum: ["user", "admin"],
         default:"user"
     }
 },{

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Signup from "./components/singup/Signup";
 import Home from "./pages/Home.jsx";
 import Login from "../src/components/login/login";
-import AdminP from "./pages/AdminP";
+// import AdminP from "./pages/AdminP";
 import Seats from "./pages/Seats";
 import Movies from "./components/Movies/Movies";
 import { NowShowing } from "./components/nowshowing/NowShowing";
@@ -12,7 +12,7 @@ import Billing from "./pages/Billing";
 import SeatingEditor from "./components/seatingCreation/SeatingEditor";
 import ShowCreate from "./components/Admin/ShowCreate";
 import MovieDetailsPage from "./pages/MovieDetailsPage";
-import AdminLogin from "./components/Admin/AdminLogin";
+// import AdminLogin from "./components/Admin/AdminLogin";
 import AdminLayout from "./components/Admin/AdminLayout";
 import AdminContextProvider from "./context/AdminContextProvider";
 
@@ -39,8 +39,8 @@ function App() {
 
           {/* Admin Section */}
           <Route path="/admin">
-            <Route path="login" element={<AdminLogin />} />
-            <Route element={<AdminP />}>
+            
+            
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminPanel />} />
                 <Route path="seating">
@@ -51,7 +51,7 @@ function App() {
                 <Route path="movies" element={<NowShowing />} />
               </Route>
             </Route>
-          </Route>
+          
         </Routes>
       </Router>
     </AdminContextProvider>
