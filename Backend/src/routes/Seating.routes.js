@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { createSeatingPlan, updateSeatingPlan, deleteSeatingPlan, getAllSeatingPlans,getSeatingPlanById, getSeatingPlanByName } from "../controller/seating.controller.js";
 import { isAdmin } from "../utils/helper.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
+router.use(isAuthenticated)
 
 router.post("/seatingplans",isAdmin, createSeatingPlan);
 

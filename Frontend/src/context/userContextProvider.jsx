@@ -2,13 +2,14 @@ import { useState } from "react";
 import { userContext } from "./userContext";
 import axios from "axios";
 
+// eslint-disable-next-line react/prop-types
 export default function UserContextProvider({ children }) {
   const [userInfo, setuserInfo] = useState({});
 
   const handlePingAdmin = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/v1/user/ping",
+        "http://localhost:8000/api/v1/users/ping",
         {
           withCredentials: true,
         }

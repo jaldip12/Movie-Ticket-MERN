@@ -9,12 +9,14 @@ export default function AdminLayout() {
   useEffect(() => {
     const checkAdminStatus = async () => {
       const isAdmin = await handlePingAdmin();
+      console.log(isAdmin);
+      
       if (!isAdmin) {
         navigate("/auth/login"); // Redirect to login if not an admin
       }
     };
     checkAdminStatus();
-  }, [handlePingAdmin, navigate]);
+  }, []);
 
   return <Outlet />;
 }

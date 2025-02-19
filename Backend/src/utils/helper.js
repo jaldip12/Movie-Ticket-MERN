@@ -1,6 +1,8 @@
 import { ApiError } from "./ApiError.js";
 const isAdmin = (req,res,next) => {
-    if(req.admin.role === "Admin"){
+    // console.log(req.body);
+    
+    if(req.user.role === "admin"){
         next();
     }else {
         return res

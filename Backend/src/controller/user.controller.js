@@ -44,7 +44,7 @@ const registeruser = asyncHandler(async (req, res) => {
 
     try {
       if (role == "user") {
-        const {city} = req.body;
+        const { city } = req.body;
         if (!city) {
           return res
             .status(400)
@@ -52,14 +52,14 @@ const registeruser = asyncHandler(async (req, res) => {
         }
         const newclient = await Client.create({
           userId: user._id,
-          city
-        })
+          city,
+        });
         let client = await newclient.save();
         user = { ...user.toObject(), ...client.toObject() };
       }
     } catch (error) {
       console.log(error);
-      
+
       return res.status(500).json(new ApiResponse(500, "Server Error", false));
     }
 
@@ -69,7 +69,7 @@ const registeruser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, user, "User created successfully"));
   } catch (error) {
     console.log(error);
-    
+
     return res.status(500).json(new ApiResponse(500, "Server Error", false));
   }
 });
@@ -81,14 +81,20 @@ const getUser = async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json(new ApiResponse(401, "User not found", false));
+      return res
+        .status(404)
+        .json(new ApiResponse(401, "User not found", false));
     }
 
     // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json(new ApiResponse(401, "Invalid Password", false));
+      return res
+        .status(401)
+        .json(new ApiResponse(401, "Invalid Password", false));
     }
+
+    console.log(user);
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },
@@ -100,14 +106,13 @@ const getUser = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      sameSite: "none",
       maxAge: 259200000,
     };
     res.cookie("token", token, options);
-    console.log("token",token);
-    
+
     // Respond with a 200 status and success message
-    res.status(200).json(new ApiResponse(200, user.role , true)); // Corrected the response format
+    res.status(200).json(new ApiResponse(200, user.role, true)); // Corrected the response format
   } catch (error) {
     res.status(500).json(new ApiResponse(500, "server error", error.message));
   }
@@ -133,24 +138,14 @@ const logout = async (req, res) => {
 
 const pingUser = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const user = await User.findById(userId).select("-password");
-    let user_details;
-    if (user.role == "user") {
-      user_details = await Client.findOne({ userId });
-    }
-    if(user_details.role == "admin"){
-      user_details= await Client.findOne({ userId });
-    }
-
-    if (!user) {
+    if (!req.user) {
       return res.status(401).json(new ApiResponse(401, "User not found"));
     }
+  
 
-    const details= {...user.toObject(),...user_details.toObject()};
-
-    res.status(200).json(new ApiResponse(200, details, "User Found"));
+    res.status(200).json(new ApiResponse(200, {user:req.user}, "User Found"));
   } catch (error) {
+    console.log(error);
     res.status(500).json(new ApiResponse(500, "Server Error", error.message));
   }
 };
