@@ -9,7 +9,7 @@ export const isAuthenticated = async (req, res, next) => {
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
-      console.log(token)
+      // console.log(token)
     if (!token) {
       return res.status(401).json(new ApiError(401, "Missing token"));
     }
@@ -24,7 +24,6 @@ export const isAuthenticated = async (req, res, next) => {
     if (!user) {
       return res.status(401).json(new ApiError(401, "user not found"));
     }
-// console.log(user)
     req.user = user;
     next();
   } catch (error) {

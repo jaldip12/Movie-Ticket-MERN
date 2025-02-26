@@ -94,7 +94,7 @@ const getUser = async (req, res) => {
         .json(new ApiResponse(401, "Invalid Password", false));
     }
 
-    console.log(user);
+    // console.log(user);
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },

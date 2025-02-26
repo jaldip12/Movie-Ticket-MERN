@@ -6,7 +6,7 @@ import axios from "axios";
 export default function UserContextProvider({ children }) {
   const [userInfo, setuserInfo] = useState({});
 
-  const handlePingAdmin = async () => {
+  const handlePing = async () => {
     try {
       const response = await axios.get(
         "http://localhost:8000/api/v1/users/ping",
@@ -21,6 +21,7 @@ export default function UserContextProvider({ children }) {
       }
       else{
         console.log(response.data);
+        // console.log("Not an admin");
       }
       return false;
     } catch (error) {
@@ -51,7 +52,7 @@ export default function UserContextProvider({ children }) {
   const ctxvalue = {
     userInfo: userInfo,
     setuserInfo: setuserInfo,
-    handlePingAdmin: handlePingAdmin,
+    handlePingAdmin: handlePing,
     logout: handleLogout,
   };
   return (

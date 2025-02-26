@@ -31,7 +31,7 @@ export default function Login() {
         formData,
         { withCredentials: true }
       );
-    console.log(response.data);
+    
       if (response.data.statusCode === 200) {
         if(response.data.data === "admin"){
           navigate("/admin");

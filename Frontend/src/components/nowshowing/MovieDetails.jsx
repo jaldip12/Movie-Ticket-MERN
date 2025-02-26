@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Star, Heart, Play, ArrowLeft, X } from "lucide-react";
+import {  Play, ArrowLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
@@ -169,6 +169,8 @@ const MovieDetailsPage = () => {
         }
 
         const showData = showResponse.data?.data || [];
+      
+        
         setShows(showData);
 
         if (showData.length > 0) {
@@ -189,14 +191,14 @@ const MovieDetailsPage = () => {
     }
   }, [movieTitle]);
 
-  const fetchSeatingLayout = async (layoutName) => {
+  const fetchSeatingLayout = async (seatingLayoutName) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/name/${layoutName}`);
+      const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/name/${seatingLayoutName}`);
       if (response.data.statusCode === 200) {
         setSeatingLayout(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching seating layout:', error);
+      console.error('Error fetching seating layout:', error.message);
       setError("Failed to load seating layout. Please try again later.");
     }
   };
@@ -432,7 +434,7 @@ const MovieDetailsPage = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-white font-bold mb-2">
-                      {show.cinemaName || 'Unknown Cinema'}
+                      {show.seatingLayoutName || 'Unknown Cinema'}
                     </h3>
                     <p className="text-gray-400">{show.time || 'Time not available'}</p>
                   </div>

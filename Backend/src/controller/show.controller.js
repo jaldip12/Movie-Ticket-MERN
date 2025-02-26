@@ -1,13 +1,12 @@
 import Show from "../models/show.model.js";
 import { asyncHandler } from "../utils/asynchandler.js";
-import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apiresponce.js";
 
 const createShow = asyncHandler(async (req, res) => {
     const { movieName, date, time, seatingLayoutName } = req.body;
 
     if (!movieName || !date || !time || !seatingLayoutName) {
-        throw new ApiError(400, "All fields are required");
+        throw new ApiResponse(400, "","All fields are required");
         
         
     }
@@ -34,9 +33,9 @@ const getShows = asyncHandler(async (req, res) => {
 
 const getShowsByMovie = asyncHandler(async (req, res) => {
     const { title } = req.query;
-
+    
     if (!title?.trim()) {
-        throw new ApiError(400, "Movie title is required");
+        throw new ApiResponse(400,"", "Movie title is required");
     }
 
     const shows = await Show.find({
@@ -47,7 +46,7 @@ const getShowsByMovie = asyncHandler(async (req, res) => {
     }).sort({ date: 1 });
 
     if (!shows?.length) {
-        throw new ApiError(404, `No shows found for movie: ${title}`);
+        throw new ApiResponse(404, "",`No shows found for movie: ${title}`);
     }
 
     return res.status(200).json(

@@ -58,7 +58,7 @@ const SidePanel = () => {
 
   const handleLogout = () => {
     // Add any logout logic here (e.g., clearing localStorage, cookies, etc.)
-    localStorage.removeItem("authToken"); // Adjust based on your auth implementation
+     // Adjust based on your auth implementation
     navigate("/login");
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -54,15 +54,13 @@ const ShowDetails = () => {
     });
   };
 
+  // Simplified grouping since we don't have cinemas in our model
   const groupedByDate = shows.reduce((acc, show) => {
     const date = formatDate(show.date);
     if (!acc[date]) {
-      acc[date] = {};
+      acc[date] = [];
     }
-    if (!acc[date][show.cinemaName]) {
-      acc[date][show.cinemaName] = [];
-    }
-    acc[date][show.cinemaName].push(show);
+    acc[date].push(show);
     return acc;
   }, {});
 
@@ -73,42 +71,27 @@ const ShowDetails = () => {
       </div>
     );
 
-  if (error)
-    return <div className="text-center p-8 text-red-500">{error}</div>;
+  if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-6">{movieTitle}</h2>
 
-      {Object.entries(groupedByDate).map(([date, cinemas]) => (
+      {Object.entries(groupedByDate).map(([date, showsForDate]) => (
         <div key={date} className="mb-8">
-          {/* Date Header */}
           <div className="text-xl font-semibold text-gray-700 mb-4">{date}</div>
-          <div className="space-y-6">
-            {Object.entries(cinemas).map(([cinemaName, shows]) => (
-              <div
-                key={cinemaName}
-                className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
-              >
-                {/* Cinema Name */}
-                {/* <div className="text-lg font-bold mb-4 text-gray-800">
-                  {cinemaName}
-                </div> */}
-
-                {/* Show Timings */}
-                <div className="flex flex-wrap gap-4">
-                  {shows.map((show) => (
-                    <button
-                      key={show._id}
-                      onClick={() => handleBooking(show._id)}
-                      className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700"
-                    >
-                      {show.time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div className="flex flex-wrap gap-4">
+              {showsForDate.map((show) => (
+                <button
+                  key={show._id}
+                  onClick={() => handleBooking(show._id)}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700"
+                >
+                  {show.time}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       ))}

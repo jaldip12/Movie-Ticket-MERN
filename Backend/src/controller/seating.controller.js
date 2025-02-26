@@ -208,25 +208,33 @@ const getSeatingPlanById = asyncHandler(async (req, res) => {
     );
 });
 const getSeatingPlanByName = asyncHandler(async (req, res) => {
-    const { name } = req.params;
-    console.log(name);
+   
+    try {
+        console.log("hiii");
+        
+        const { name } = req.params;
+        console.log(name);
+        if (!name?.trim()) {
+            return res.status(400).json(
+                new ApiResponse(400, null, "Seating plan name is required")
+            );
+        }
+        const seatingPlan = await Seating.findOne({ name: name.trim() });
     
-    if (!name) {
-        throw new ApiError(400, "Seating plan name is required");
+        if (!seatingPlan) {
+            return res.status(404).json(
+                new ApiResponse(404, null, `No seating plan found with name: ${name}`)
+            );
+        }
+    
+        return res.status(200).json(
+            new ApiResponse(200, seatingPlan, "Seating plan retrieved successfully")
+        );
+    } catch (error) {
+        console.log(error);
+        
     }
-
-    const seatingPlan = await Seating.findOne({ name: name });
-
-    if (!seatingPlan) {
-        throw new ApiError(404, `No seating plan found with name: ${name}`);
-    }
-
-    return res.status(200).json(
-        new ApiResponse(200, seatingPlan, "Seating plan fetched successfully")
-    );
 });
-
-
 export {
     createSeatingPlan,
     updateSeatingPlan,
