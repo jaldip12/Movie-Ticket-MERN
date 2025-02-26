@@ -73,6 +73,7 @@ const seatingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
 // Generate unique ID starting from 100
 seatingSchema.pre("save", async function (next) {
   if (!this.id) {
@@ -87,3 +88,4 @@ seatingSchema.pre("save", async function (next) {
 
 const Seating = mongoose.model("Seating", seatingSchema);
 export default Seating;
+
