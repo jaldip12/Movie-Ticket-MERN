@@ -1,18 +1,14 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useContext } from "react";
-import { userContext } from "@/context/userContext"; // Using @/ alias for src directory
-
+import { useRecoilValue } from "recoil";
+import{user} from "@/context/userContext";
 export function Header() {
-  const { userInfo, logout } = useContext(userContext) || {}; // Add fallback for context
-  console.log(userInfo);
   
+  const userdata = useRecoilValue(user);
+
+
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+   
   };
 
   return (
@@ -88,7 +84,7 @@ export function Header() {
           </button>
 
           {/* Conditional Rendering for Login/Signup or Logout */}
-          {userInfo?._id ? (
+          {userdata ? (
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white hover:bg-red-600 transition-all transform hover:scale-105 duration-300 shadow-lg rounded-full font-bold px-8 py-2"

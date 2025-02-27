@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState} from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { usera } from "@/context/userContext";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-
+import { useRecoilState } from "recoil";
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ export default function Login() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [user, setUser] = useRecoilState(usera);
+
 
   const handleInputChange = (e) => {
     setFormData({
@@ -33,6 +36,10 @@ export default function Login() {
       );
     
       if (response.data.statusCode === 200) {
+        await setUser(response.data.data );
+        console.log("uu",user);
+        
+        
         if(response.data.data === "admin"){
           navigate("/admin");
       }

@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
+import { RecoilRoot } from "recoil";
 import "./index.css";
 import { Toaster } from 'react-hot-toast'
-import UserContextProvider from "./context/userContextProvider.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
  
   <React.StrictMode>
-  <UserContextProvider>
+  <RecoilRoot>
   <Toaster
           position="top-center"
           reverseOrder={false}
@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           }}
         />
     <App />
-    </UserContextProvider>
+    </RecoilRoot>
   </React.StrictMode>
   
 );

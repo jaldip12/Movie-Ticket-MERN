@@ -1,8 +1,6 @@
-import { createContext } from "react";
+import {atom} from 'recoil';
 
-export const userContext = createContext({
-    userInfo: {},
-    setuserInfo: () => {},
-    handlePing: () => Promise.resolve(false), 
-    logout: () => Promise.resolve(false)
-});
+export const user = atom({
+    key: 'User',
+    default: null,
+  });

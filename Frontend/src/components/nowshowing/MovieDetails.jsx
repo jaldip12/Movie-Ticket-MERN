@@ -193,7 +193,16 @@ const MovieDetailsPage = () => {
 
   const fetchSeatingLayout = async (seatingLayoutName) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/name/${seatingLayoutName}`);
+      // const response = await axios.get(`http://localhost:8000/api/v1/seating/seatingplans/name/${seatingLayoutName}`);
+      const response = await axios.get(
+        `http://localhost:8000/api/v1/seating/seatingplans/name/${seatingLayoutName}`,
+        {
+          withCredentials: true, // This allows cookies to be sent
+        }
+      );
+      
+      console.log("rrr", response);
+      
       if (response.data.statusCode === 200) {
         setSeatingLayout(response.data.data);
       }

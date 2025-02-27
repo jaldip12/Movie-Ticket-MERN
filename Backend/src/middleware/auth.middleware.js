@@ -2,14 +2,11 @@ import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 export const isAuthenticated = async (req, res, next) => {
-  try {
-    if (res.headersSent) {
-      return next(); // Skip sending headers again
-    }
+  
+  try {  
     const token =
       req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
-      // console.log(token)
     if (!token) {
       return res.status(401).json(new ApiError(401, "Missing token"));
     }
