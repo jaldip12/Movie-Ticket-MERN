@@ -1,11 +1,12 @@
 import Container from "../ui/Container";
-import { useContext } from "react";
 import {useNavigate } from "react-router"
 import { Logo } from "../UI/Logo";
-import { userContext} from "../../context/userContext.jsx"
+
 export default function AdminHeader() {
 
-    const { logout } = useContext(userContext);
+    const logout =()=>{
+
+    }
     const navigate = useNavigate();
 
     async function handleLogout(){

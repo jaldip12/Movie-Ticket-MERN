@@ -14,6 +14,7 @@ import ShowCreate from "./components/Admin/ShowCreate";
 import MovieDetailsPage from "./pages/MovieDetailsPage";
 // import AdminLogin from "./components/Admin/AdminLogin";
 import AdminLayout from "./components/Admin/AdminLayout";
+import AddMoviePage from "./components/addmovie/AddMovie";
 // import UserContextProvider from "./context/userContextProvider";
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
                 </Route>
                 <Route path="shows" element={<ShowCreate />} />
                 <Route path="movies" element={<NowShowing />} />
+                <Route path="addmovies" element={<AddMoviePage />} />
               </Route>
             </Route>
           

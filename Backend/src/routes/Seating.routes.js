@@ -5,11 +5,11 @@ import { isAuthenticated } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.use(isAuthenticated)
+// router.use(isAuthenticated)
 
 router.post("/seatingplans",isAdmin, createSeatingPlan);
 
-router.get("/seatingplans",isAdmin, getAllSeatingPlans);
+router.get("/seatingplans", getAllSeatingPlans);
 
 router.put("/seatingplans/:id", isAdmin, updateSeatingPlan);
 

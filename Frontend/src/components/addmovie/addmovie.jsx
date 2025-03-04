@@ -98,7 +98,7 @@ const SelectInput = ({ label, name, options, value, onChange, error }) => (
   </div>
 );
 
-export function AddMoviePage() {
+export default function AddMoviePage() {
   const [movieData, setMovieData] = useState(initialMovieData);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});

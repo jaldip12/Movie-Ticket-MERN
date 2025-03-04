@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRecoilValue } from "recoil";
-import{user} from "@/context/userContext";
+import{usera} from "@/context/userContext";
 export function Header() {
   
-  const userdata = useRecoilValue(user);
+  const userdata = useRecoilValue(usera);
 
 
   const handleLogout = async () => {
