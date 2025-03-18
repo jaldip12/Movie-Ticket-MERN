@@ -19,7 +19,7 @@ export function Header() {
           to="/"
           className="flex items-center text-yellow-400 transition-transform hover:scale-105 duration-300"
         >
-          <span className="text-3xl font-bold tracking-wider">Jaldip</span>
+          <span className="text-3xl font-bold tracking-wider">MovieVista</span>
         </Link>
 
         {/* Navigation Links */}
