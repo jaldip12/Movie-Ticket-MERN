@@ -15,6 +15,7 @@ import MovieDetailsPage from "./pages/MovieDetailsPage";
 // import AdminLogin from "./components/Admin/AdminLogin";
 import AdminLayout from "./components/Admin/AdminLayout";
 import AddMoviePage from "./components/addmovie/AddMovie";
+import MovieBookingPage from "../src/components/nowshowing/Booking"
 // import UserContextProvider from "./context/userContextProvider";
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route index element={<Movies />} />
             <Route path=":movieTitle">
               <Route index element={<MovieDetailsPage />} />
+              <Route path="booking" element={<MovieBookingPage />} />
               <Route path="billing" element={<Billing />} />
             </Route>
           </Route>
@@ -50,6 +52,7 @@ function App() {
                 <Route path="shows" element={<ShowCreate />} />
                 <Route path="movies" element={<NowShowing />} />
                 <Route path="addmovies" element={<AddMoviePage />} />
+
               </Route>
             </Route>
           

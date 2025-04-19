@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Star, Film, Heart } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -22,10 +20,10 @@ export function NowShowing() {
         if (response.data.statusCode === 200) {
           setMovies(response.data.data)
         } else {
-          setError("Failed to fetch movies")
+          setError(`Failed to fetch movies: ${response.data.message || 'Unknown error'}`)
         }
       } catch (error) {
-        setError("Error loading movies")
+        setError(`Error loading movies: ${error.response?.data?.message || error.message}`)
         console.error("Error fetching movies:", error)
       } finally {
         setLoading(false)
@@ -69,7 +67,7 @@ export function NowShowing() {
         >
           <AnimatePresence>
             {movies.map((movie, index) => (
-              <MovieCard key={movie._id} movie={movie} index={index} />
+              <MovieCard key={movie._id || index} movie={movie} index={index} />
             ))}
           </AnimatePresence>
         </motion.div>
@@ -78,12 +76,16 @@ export function NowShowing() {
   )
 }
 
+// Helper to generate clean URLs from movie titles
+const slugify = (title) =>
+  title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
+
 function MovieCard({ movie, index }) {
   const [isLiked, setIsLiked] = useState(false)
   const navigate = useNavigate()
 
   const handleBookNow = () => {
-    navigate(`/Movies/${encodeURIComponent(movie.title)}`)
+    navigate(`/Movies/${slugify(movie.title)}`)
   }
 
   return (
@@ -99,6 +101,7 @@ function MovieCard({ movie, index }) {
           <img
             src={movie.poster}
             alt={`${movie.title} poster`}
+            onError={(e) => { e.target.src = "/fallback.jpg" }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 rounded-t-xl"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -111,6 +114,7 @@ function MovieCard({ movie, index }) {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
               className="text-gray-400 hover:text-yellow-500 transition-all"
               onClick={(e) => {
                 e.stopPropagation()
@@ -118,25 +122,26 @@ function MovieCard({ movie, index }) {
               }}
               title={isLiked ? "Remove from favorites" : "Add to favorites"}
             >
-              <Heart className={`w-6 h-6 ${isLiked ? 'fill-current text-yellow-500' : ''}`} />
+              <Heart className={`w-6 h-6 ${isLiked ? "fill-current text-yellow-500" : ""}`} />
             </Button>
           </div>
           <div className="flex items-center mb-3">
             <Star className="w-5 h-5 text-yellow-500 mr-1" />
-            <span className="font-bold text-white">{movie.rating}/10</span>
-            <span className="text-sm text-gray-400 ml-2">({movie.votes} votes)</span>
+            <span className="font-bold text-white">{movie.rating || 'N/A'}/10</span>
+            <span className="text-sm text-gray-400 ml-2">({movie.votes || 0} votes)</span>
           </div>
           <div className="flex items-center space-x-3 mb-4">
             <Badge variant="secondary" className="bg-gray-700 text-yellow-500 px-2 py-1 rounded-full text-xs">
-              {movie.certification}
+              {movie.certification || 'NA'}
             </Badge>
             <Badge variant="outline" className="border-gray-700 text-gray-400 px-2 py-1 rounded-full text-xs">
-              {movie.language}
+              {movie.language || 'Unknown'}
             </Badge>
           </div>
-          <Button 
+          <Button
             className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md"
             onClick={handleBookNow}
+            aria-label="Book movie ticket"
           >
             <Film className="w-4 h-4 mr-2" />
             Book Now
