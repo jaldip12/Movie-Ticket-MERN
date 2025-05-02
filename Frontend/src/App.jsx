@@ -32,7 +32,7 @@ function App() {
           {/* Movies Section */}
           <Route path="/movies">
             <Route index element={<Movies />} />
-            <Route path=":movieTitle">
+            <Route path=":movieId">
               <Route index element={<MovieDetailsPage />} />
               <Route path="booking" element={<MovieBookingPage />} />
               <Route path="billing" element={<Billing />} />

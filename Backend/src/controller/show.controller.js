@@ -44,7 +44,7 @@ const getShowsByMovie = asyncHandler(async (req, res) => {
             $options: 'i'
         }
     }).sort({ date: 1 });
-
+    
     if (!shows?.length) {
         throw new ApiResponse(404, "",`No shows found for movie: ${title}`);
     }

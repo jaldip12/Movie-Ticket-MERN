@@ -1,372 +1,191 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+// import { Calendar } from "lucide-react";
 import axios from "axios";
 
-const TheaterSeating = ({ seatingPlan, onSeatSelect }) => {
-  const [selectedSeats, setSelectedSeats] = useState([]);
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  const validateSeatingPlan = (plan) => {
-    if (!plan || !Array.isArray(plan.sections)) return false;
-    return plan.sections.every(section => 
-      section && 
-      section.name &&
-      typeof section.rows === 'number' &&
-      typeof section.columns === 'number' &&
-      typeof section.price === 'number'
-    );
-  };
-
-  const handleSeatClick = (section, row, seatNumber) => {
-    const seatId = `${row}${seatNumber}`;
-    
-    setSelectedSeats((prev) => {
-      const newSelection = prev.some(seat => seat.id === seatId)
-        ? prev.filter(seat => seat.id !== seatId)
-        : [...prev, { id: seatId, price: section.price, row, seatNumber }];
-
-      const newTotalPrice = newSelection.reduce((sum, seat) => sum + seat.price, 0);
-      setTotalPrice(newTotalPrice);
-      onSeatSelect?.(newSelection);
-      return newSelection;
-    });
-  };
-
-  const isSeatUnavailable = (section, row, seatNumber) => {
-    return section.unavailableSeats?.some(unavailable => 
-      unavailable.row === row && unavailable.seats.includes(seatNumber)
-    ) || section.bookedSeats?.some(booked => 
-      booked.row === row && booked.seats.includes(seatNumber)
-    );
-  };
-
-  const renderSeat = (section, row, seatNumber) => {
-    const seatId = `${row}${seatNumber}`;
-    const isUnavailable = isSeatUnavailable(section, row, seatNumber);
-    const isSelected = selectedSeats.some(seat => seat.id === seatId);
-
-    return (
-      <button
-        key={seatId}
-        onClick={() => !isUnavailable && handleSeatClick(section, row, seatNumber)}
-        disabled={isUnavailable}
-        className={`
-          w-8 h-8 m-1 text-sm font-medium border rounded transition-colors
-          ${
-            isUnavailable
-              ? "bg-gray-500 text-gray-400 cursor-not-allowed border-gray-600"
-              : isSelected
-              ? "bg-green-500 text-white border-green-600 hover:bg-green-600"
-              : "bg-gray-700 border-green-500 text-green-500 hover:bg-gray-600"
-          }
-        `}
-        title={`Seat ${seatId} - Rs. ${section.price}`}
-      >
-        {seatNumber}
-      </button>
-    );
-  };
-
-  const renderRow = (section, rowIndex) => {
-    const rowId = String.fromCharCode(65 + rowIndex); // Convert 0 to 'A', 1 to 'B', etc.
-    
-    return (
-      <div key={rowId} className="flex items-center mb-2">
-        <span className="w-8 text-right mr-4 text-gray-400">{rowId}</span>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: section.columns }, (_, index) =>
-            renderSeat(section, rowId, index + 1)
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  if (!validateSeatingPlan(seatingPlan)) {
-    console.error('Invalid seating plan data:', seatingPlan);
-    return (
-      <div className="text-center text-gray-400 p-8">
-        Invalid seating plan configuration
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-gray-800 rounded-lg p-6">
-      {seatingPlan.sections.map((section) => (
-        <div key={section.name} className="mb-8">
-          <h3 className="text-gray-300 mb-4 font-semibold">
-            {section.name.toUpperCase()} - Rs. {section.price}
-          </h3>
-          <div className="space-y-2">
-            {Array.from({ length: section.rows }, (_, index) =>
-              renderRow(section, index)
-            )}
-          </div>
-        </div>
-      ))}
-
-      {/* Screen indicator */}
-      <div className="mt-12 relative">
-        <div className="w-2/3 h-2 bg-gray-400 mx-auto rounded-t-lg transform -skew-y-1" />
-        <p className="text-center text-sm text-gray-400 mt-2">SCREEN</p>
-      </div>
-
-      {/* Selected seats summary */}
-      {selectedSeats.length > 0 && (
-        <div className="mt-6 p-4 bg-gray-700 rounded-lg">
-          <p className="text-white">
-            Selected Seats: {selectedSeats.map(seat => seat.id).join(", ")}
-          </p>
-          <p className="text-white">
-            Total Amount: Rs. {totalPrice}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default function MovieBookingPage(){
+export default function Booking({ movieTitle = "MovieTitle" }) {
   const navigate = useNavigate();
-  const { movieTitle } = useParams();
-
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [shows, setShows] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
-  const [error, setError] = useState(null);
-  const [selectedShow, setSelectedShow] = useState(null);
-  const [seatingLayout, setSeatingLayout] = useState(null);
-  const [selectedSeats, setSelectedSeats] = useState([]);
 
   useEffect(() => {
-    const fetchAndSetMovie = async () => {
+    const fetchShows = async () => {
       try {
-        const decodedTitle = decodeURIComponent(movieTitle);
-
-        const movieResponse = await axios.get(
-          `http://localhost:8000/api/v1/movies/getmoviebytitle/${decodedTitle}`
+        const response = await axios.get(
+          `http://localhost:8000/api/v1/shows/title?title=${encodeURIComponent(movieTitle)}`
         );
-        const showResponse = await axios.get(
-          `http://localhost:8000/api/v1/shows/search?title=${decodedTitle}`
-        );
-
-        if (movieResponse.data?.statusCode === 200) {
-          const movieData = {
-            title: movieResponse.data.data?.title || "Unknown Title",
-            poster: movieResponse.data.data?.poster || "",
-            duration: movieResponse.data.data?.duration || "N/A",
-            certification: movieResponse.data.data?.certification || "N/A",
-            genre: movieResponse.data.data?.genre || "N/A",
-            releaseDate:
-              movieResponse.data.data?.releaseDate || new Date().toISOString(),
-            languages: movieResponse.data.data?.languages || [],
-            description:
-              movieResponse.data.data?.description ||
-              "No description available",
-            trailerUrl: movieResponse.data.data?.trailerUrl || "",
-          };
-          setMovie(movieData);
-        }
-
-        const showData = showResponse.data?.data || [];
+        const showData = response.data?.data || [];
         setShows(showData);
 
         if (showData.length > 0) {
-          const firstShow = showData[0];
-          setSelectedDate(new Date(firstShow.date).toLocaleDateString());
-          setSelectedLanguage(firstShow.language);
+          const firstDate = new Date(showData[0].date).toISOString().split("T")[0];
+          setSelectedDate(firstDate);
         }
       } catch (error) {
-        console.error("Failed to load data:", error);
-        setError("Failed to load movie details. Please try again later.");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching show data:", error);
       }
     };
 
-    if (movieTitle) {
-      fetchAndSetMovie();
-    }
+    if (movieTitle) fetchShows();
   }, [movieTitle]);
 
-  const fetchSeatingLayout = async (seatingLayoutName) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/api/v1/seating/seatingplans/name/${seatingLayoutName}`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.statusCode === 200) {
-        setSeatingLayout(response.data.data);
+  const getAvailableDates = () => {
+    const datesMap = new Map();
+    shows.forEach((show) => {
+      const date = new Date(show.date).toISOString().split("T")[0];
+      if (!datesMap.has(date)) {
+        const d = new Date(show.date);
+        datesMap.set(date, {
+          fullDate: date,
+          day: d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
+          date: d.getDate().toString().padStart(2, "0"),
+          month: d.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
+        });
       }
-    } catch (error) {
-      console.error("Error fetching seating layout:", error.message);
-      setError("Failed to load seating layout. Please try again later.");
-    }
-  };
-  
+    });
 
-  const handleBooking = async (showId) => {
-    const show = shows.find((s) => s._id === showId);
-    if (show) {
-      setSelectedShow(show);
-      await fetchSeatingLayout(show.seatingLayoutName);
-    }
+    return Array.from(datesMap.values()).sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate)).slice(0, 7);
   };
 
-  const handleSeatSelect = (seats) => {
-    setSelectedSeats(seats);
-  };
-
-  const getDatesFromShows = () => {
-    if (!shows || shows.length === 0) return [];
-
-    const uniqueDates = [
-      ...new Set(
-        shows.map((show) =>
-          new Date(show.date).toLocaleDateString("en-US", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })
-        )
-      ),
-    ];
-    return uniqueDates.slice(0, 7);
-  };
-
-  const getShowsForDate = (date) => {
-    if (!shows || shows.length === 0) return [];
-
+  const getShowsForDate = (dateStr) => {
     return shows.filter(
-      (show) =>
-        new Date(show.date).toLocaleDateString() ===
-        new Date(date).toLocaleDateString()
+      (show) => new Date(show.date).toISOString().split("T")[0] === dateStr
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
-  }
+  const formatShowTime = (dateTimeStr) => {
+    return new Date(dateTimeStr).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-        {error}
-      </div>
-    );
-  }
+  const getTheaterGroups = () => {
+    const filteredShows = getShowsForDate(selectedDate);
+    const groups = {};
 
-  if (!movie) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-        Movie not found.
-      </div>
-    );
-  }
+    filteredShows.forEach((show) => {
+      if (!groups[show.theater]) {
+        groups[show.theater] = [];
+      }
+      groups[show.theater].push(show);
+    });
+
+    return groups;
+  };
+
+  const calendarDates = getAvailableDates();
+  const theaterGroups = getTheaterGroups();
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {/* Header */}
-      <div className="p-4 flex items-center justify-between">
-        <Button
-          variant="ghost"
-          className="text-white"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2" /> Back
-        </Button>
-        <h1 className="text-xl font-bold text-white">{movie.title}</h1>
-        <div className="w-8"></div> {/* Empty div for flex spacing */}
-      </div>
-
-      {/* Show Times */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold text-white mb-6">SELECT DATE</h2>
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {getDatesFromShows().map((date) => (
-            <Button
-              key={date}
-              onClick={() => setSelectedDate(date)}
-              className={`px-6 py-3 rounded-lg whitespace-nowrap ${
-                selectedDate === date
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-300"
+    <div className="max-w-6xl mx-auto px-4">
+      {/* Filters Section */}
+      <div className="flex items-center justify-between border-b border-gray-200 py-3">
+        <div className="flex overflow-x-auto space-x-1 pb-2">
+          {calendarDates.map((dateObj) => (
+            <button
+              key={dateObj.fullDate}
+              onClick={() => setSelectedDate(dateObj.fullDate)}
+              className={`flex flex-col items-center min-w-16 p-2 rounded-lg ${
+                selectedDate === dateObj.fullDate
+                  ? "bg-red-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              {date}
-            </Button>
+              <span className="text-xs font-medium">{dateObj.day}</span>
+              <span className="text-xl font-bold">{dateObj.date}</span>
+              <span className="text-xs">{dateObj.month}</span>
+            </button>
           ))}
         </div>
 
-        {/* Show Listings */}
-        <div className="mt-8">
-            <h2 className="text-xl font-bold text-white mb-4">SELECT SHOWTIME</h2>
-            {selectedDate &&
-            getShowsForDate(selectedDate).map((show) => (
-                <div key={show._id} className="bg-gray-800 rounded-lg p-4 mb-4">
-                <div className="flex justify-between items-center">
-                    <div>
-                    <h3 className="text-white font-bold mb-2">
-                    {show.seatingLayoutName || "Unknown Cinema"}
-                    </h3>
-                    <p className="text-gray-400">
-                    {show.time || "Time not available"}
-                    </p>
-                    </div>
-                    <Button
-                    onClick={() => handleBooking(show._id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                    Book Now
-                    </Button>
-                </div>
-                </div>
-            ))}
-        </div>
-
-        {/* Seating Layout */}
-        {selectedShow && seatingLayout && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-white mb-6">SELECT SEATS</h2>
-            <TheaterSeating
-              seatingPlan={seatingLayout}
-              onSeatSelect={handleSeatSelect}
-            />
-
-            {selectedSeats.length > 0 && (
-              <div className="mt-8 flex justify-end">
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-                  onClick={() => {
-                    // Implement checkout logic here
-                    alert(
-                      `Processing booking for ${selectedSeats.length} seats`
-                    );
-                  }}
-                >
-                  Continue ({selectedSeats.length} Seats)
-                </Button>
-              </div>
-            )}
+        <div className="flex items-center space-x-2">
+          <div className="px-3 py-2 border border-gray-300 rounded-md">
+            <span className="whitespace-nowrap">Hindi - 2D</span>
           </div>
+          <div className="px-3 py-2 border border-gray-300 rounded-md flex items-center">
+            <span className="whitespace-nowrap">Price Range</span>
+            <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <div className="px-3 py-2 border border-gray-300 rounded-md flex items-center">
+            <span className="whitespace-nowrap">Preferred Time</span>
+            <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <button className="p-2 border border-gray-300 rounded-md">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-end mt-2 space-x-4 text-sm">
+        <div className="flex items-center">
+          <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+          <span>AVAILABLE</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+          <span>FAST FILLING</span>
+        </div>
+        <div className="flex items-center">
+          <span className="border border-gray-300 text-xs px-1 mr-1">LAN</span>
+          <span>SUBTITLES LANGUAGE</span>
+        </div>
+      </div>
+
+      {/* Theaters */}
+      <div className="mt-6 space-y-8">
+        {Object.keys(theaterGroups).length > 0 ? (
+          Object.keys(theaterGroups).map((theater) => (
+            <div key={theater} className="border-b border-gray-200 pb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <button className="text-gray-400 hover:text-red-500">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
+                  <h3 className="text-lg font-medium">{theater}</h3>
+                </div>
+                <button className="text-gray-600 flex items-center">
+                  <span className="mr-1">INFO</span>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mt-4">
+                {theaterGroups[theater].map((show) => (
+                  <div key={show._id} className="inline-block mr-4 mb-4">
+                    <button
+                      onClick={() => navigate(`/booking/${show._id}`)}
+                      className="border border-gray-300 rounded px-4 py-2 hover:bg-gray-100 focus:outline-none"
+                    >
+                      <div className="font-medium text-green-600">{formatShowTime(show.time)}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {show.cancellable ? "Cancellation available" : "Non-cancellable"}
+                      </div>
+                      {show.features?.includes("2K LASER DOLBY 7.1") && (
+                        <div className="text-xs text-gray-500">2K LASER DOLBY 7.1</div>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center text-gray-500 mt-10 text-lg">No shows available for the selected date.</div>
         )}
       </div>
     </div>
   );
-    
-     
-};
-
+}

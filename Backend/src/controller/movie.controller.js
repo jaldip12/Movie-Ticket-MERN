@@ -59,10 +59,15 @@ const getMovieTitles = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, movieTitles, "Movie titles retrieved successfully"));
 });
 
-const getMovieByTitle = asyncHandler(async (req, res) => {
-    const { movieTitle } = req.params;
+const getMovieById = asyncHandler(async (req, res) => {
+    const { movieId } = req.params;
+    console.log("Movie ID:", movieId); // Debugging line
+    
+    if (!movieId) {
+        return res.status(400).json(new ApiResponse(400, null, "Movie ID is required"));
+    }
 
-    const movie = await Movie.findOne({ title: movieTitle }).select('-_id');
+    const movie = await Movie.findById(movieId).select('-_id');
 
     if (!movie) {
         return res.status(404).json(new ApiResponse(404, null, "Movie not found"));
@@ -72,4 +77,4 @@ const getMovieByTitle = asyncHandler(async (req, res) => {
 });
 
 
-export { addmovie, getmovies, getallmovies, getMovieTitles, getMovieByTitle };
+export { addmovie, getmovies, getallmovies, getMovieTitles, getMovieById };
