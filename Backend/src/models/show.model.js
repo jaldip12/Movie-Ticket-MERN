@@ -1,23 +1,32 @@
 import mongoose from "mongoose";
 
-const showSchema = new mongoose.Schema({
+const showSchema = new mongoose.Schema(
+  {
     movieName: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     date: {
-        type: Date,
-        required: true
+      type: Date,
+      required: true,
     },
     time: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     seatingLayoutName: {
+      type: String,
+      required: true,
+    },
+    bookedSeats: [
+      {
         type: String,
-        required: true
-    }
-}, { timestamps: true });
+        default: [],
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 const Show = mongoose.model("Show", showSchema);
 export default Show;

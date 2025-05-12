@@ -25,7 +25,8 @@ const createShow = asyncHandler(async (req, res) => {
 
 const getShows = asyncHandler(async (req, res) => {
     const shows = await Show.find();
-
+    
+    
     return res.status(200).json(
         new ApiResponse(200, shows, "Shows fetched successfully")
     );
@@ -44,7 +45,7 @@ const getShowsByMovie = asyncHandler(async (req, res) => {
             $options: 'i'
         }
     }).sort({ date: 1 });
-    
+    console.log(shows);
     if (!shows?.length) {
         throw new ApiResponse(404, "",`No shows found for movie: ${title}`);
     }

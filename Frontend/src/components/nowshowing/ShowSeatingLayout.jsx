@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 
-const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movieTitle }) => {
+const ShowSeatingLayout = ({
+  seatingLayoutName,
+  showId,
+  showTime,
+  showDate,
+  movieTitle,
+}) => {
   const navigate = useNavigate();
   const [seatingPlan, setSeatingPlan] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -39,30 +45,70 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
 
   const numberToLetter = (number) => String.fromCharCode(65 + number);
 
+  // Add this helper function to count available seats
+  const getAvailableSeatNumber = (
+    sectionIndex,
+    row,
+    currentSeatNumber,
+    section
+  ) => {
+    let count = 0;
+    for (let col = 1; col <= section.columns; col++) {
+      const isUnavailable = section.unavailableSeats?.some(
+        (unavailable) =>
+          unavailable.row === row && unavailable.seats.includes(col)
+      );
+
+      if (!isUnavailable) {
+        count++;
+      }
+
+      if (col === currentSeatNumber) {
+        return isUnavailable ? null : count;
+      }
+    }
+    return count;
+  };
+
   const isSeatUnavailable = (sectionIndex, row, seatNumber) => {
     const section = seatingPlan?.sections[sectionIndex];
-    return section?.unavailableSeats?.some(unavailable =>
-      unavailable.row === row && unavailable.seats.includes(seatNumber)
+    return (
+      section?.unavailableSeats?.some(
+        (unavailable) =>
+          unavailable.row === row && unavailable.seats.includes(seatNumber)
+      ) || false
     );
   };
 
   const isSeatSelected = (seatId) => {
-    return selectedSeats.some(seat => seat.id === seatId);
+    return selectedSeats.some((seat) => seat.id === seatId);
   };
 
   const handleSeatClick = (sectionIndex, row, seatNumber, price) => {
-    const seatId = `${sectionIndex}-${row}${seatNumber}`; // Add sectionIndex to make seat IDs unique
-    setSelectedSeats(prev => {
-      const existing = prev.find(seat => seat.id === seatId);
+    const section = seatingPlan.sections[sectionIndex];
+    const availableNumber = getAvailableSeatNumber(
+      sectionIndex,
+      row,
+      seatNumber,
+      section
+    );
+    const seatId = `${sectionIndex}-${row}${seatNumber}`;
+
+    setSelectedSeats((prev) => {
+      const existing = prev.find((seat) => seat.id === seatId);
       const updated = existing
-        ? prev.filter(seat => seat.id !== seatId)
-        : [...prev, {
-            id: seatId,
-            row,
-            seatNumber,
-            section: seatingPlan.sections[sectionIndex].name,
-            price
-          }];
+        ? prev.filter((seat) => seat.id !== seatId)
+        : [
+            ...prev,
+            {
+              id: seatId,
+              row,
+              seatNumber,
+              displayNumber: availableNumber, // Add this field
+              section: seatingPlan.sections[sectionIndex].name,
+              price,
+            },
+          ];
       setShowSummary(updated.length > 0);
       return updated;
     });
@@ -84,31 +130,42 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
           theater: seatingLayoutName,
           time: showTime,
           date: showDate,
-          movieTitle
-        }
-      }
+          movieTitle,
+        },
+      },
     });
   };
 
   const SeatButton = ({ sectionIndex, row, seatNumber, price }) => {
-    const seatId = `${sectionIndex}-${row}${seatNumber}`; // Updated to include sectionIndex
+    const section = seatingPlan.sections[sectionIndex];
     const isUnavailable = isSeatUnavailable(sectionIndex, row, seatNumber);
+    const seatId = `${sectionIndex}-${row}${seatNumber}`;
     const isSelected = isSeatSelected(seatId);
 
     if (isUnavailable) {
       return <div className="w-10 h-10 opacity-0"></div>;
     }
 
+    const availableNumber = getAvailableSeatNumber(
+      sectionIndex,
+      row,
+      seatNumber,
+      section
+    );
+
     return (
       <button
         onClick={() => handleSeatClick(sectionIndex, row, seatNumber, price)}
         className={`w-10 h-10 rounded flex items-center justify-center transition-all duration-200 transform
-          ${isSelected ? 'bg-green-500 text-white shadow-lg scale-105' :
-            'bg-white border-2 border-blue-500 hover:bg-blue-50 hover:scale-105'}
+          ${
+            isSelected
+              ? "bg-green-500 text-white shadow-lg scale-105"
+              : "bg-white border-2 border-blue-500 hover:bg-blue-50 hover:scale-105"
+          }
         `}
-        title={`Seat ${row}${seatNumber} - ₹${price}`}
+        title={`Seat ${row}${availableNumber} - ₹${price}`}
       >
-        <span className="text-sm font-semibold">{seatNumber}</span>
+        <span className="text-sm font-semibold">{availableNumber}</span>
       </button>
     );
   };
@@ -149,7 +206,9 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
         <div key={sectionIndex} className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <h3 className="text-xl font-bold text-gray-800">{section.name}</h3>
+              <h3 className="text-xl font-bold text-gray-800">
+                {section.name}
+              </h3>
               <span className="ml-3 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                 ₹{section.price}
               </span>
@@ -163,12 +222,16 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
               for (let i = 0; i < sectionIndex; i++) {
                 previousRows += seatingPlan.sections[i].rows;
               }
-              const continuousRowLetter = numberToLetter(previousRows + rowIndex);
-              
+              const continuousRowLetter = numberToLetter(
+                previousRows + rowIndex
+              );
+
               return (
                 <div key={rowIndex} className="flex items-center gap-4">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="font-bold text-blue-800">{continuousRowLetter}</span>
+                    <span className="font-bold text-blue-800">
+                      {continuousRowLetter}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     {[...Array(section.columns)].map((_, colIndex) => (
@@ -203,7 +266,9 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
       <div className="w-full mt-12">
         <div className="w-3/4 mx-auto h-1 bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
         <div className="w-3/4 mx-auto h-12 bg-gradient-to-b from-gray-300 to-gray-200 rounded-b-3xl shadow-md flex items-center justify-center">
-          <span className="text-gray-700 font-semibold tracking-wider">SCREEN</span>
+          <span className="text-gray-700 font-semibold tracking-wider">
+            SCREEN
+          </span>
         </div>
       </div>
 
@@ -212,9 +277,10 @@ const ShowSeatingLayout = ({ seatingLayoutName, showId, showTime, showDate, movi
           <div className="max-w-6xl mx-auto p-4 flex justify-between items-center">
             <div>
               <p className="font-medium">
-                Selected Seats: {selectedSeats
+                Selected Seats:{" "}
+                {selectedSeats
                   .sort((a, b) => a.id.localeCompare(b.id))
-                  .map(seat => `${seat.row}${seat.seatNumber}`)
+                  .map((seat) => `${seat.row}${seat.displayNumber}`) // Use displayNumber instead of seatNumber
                   .join(", ")}
               </p>
               <p className="text-lg font-bold">₹{calculateTotalAmount()}</p>
