@@ -122,7 +122,7 @@ const ShowSeatingLayout = ({
       alert("Please select at least one seat.");
       return;
     }
-    navigate(`/booking/confirm/${showId}`, {
+    navigate(`/booking/${showId}`, {
       state: {
         selectedSeats,
         totalAmount: calculateTotalAmount(),

@@ -8,7 +8,6 @@ import Seats from "./pages/Seats";
 import Movies from "./components/Movies/Movies";
 import { NowShowing } from "./components/nowshowing/NowShowing";
 import AdminPanel from "./components/Admin/AdminPanel";
-import Billing from "./pages/Billing";
 import SeatingEditor from "./components/seatingCreation/SeatingEditor";
 import ShowCreate from "./components/Admin/ShowCreate";
 import MovieDetailsPage from "./pages/MovieDetailsPage";
@@ -17,6 +16,8 @@ import AdminLayout from "./components/Admin/AdminLayout";
 import AddMoviePage from "./components/addmovie/AddMovie";
 import MovieBookingPage from "../src/components/nowshowing/Booking"
 // import UserContextProvider from "./context/userContextProvider";
+import Proceedtopay from "./components/nowshowing/Proceedtopay";
+import Pyment from "./components/nowshowing/Pyment";
 function App() {
   return (
     // <UserContextProvider>
@@ -35,10 +36,12 @@ function App() {
             <Route path=":movieId">
               <Route index element={<MovieDetailsPage />} />
               <Route path="booking" element={<MovieBookingPage />} />
-              <Route path="billing" element={<Billing />} />
+              <Route path="booking/conformation" element={<Pyment/>} />
             </Route>
           </Route>
-
+          <Route path="booking/:showId" element={<Proceedtopay/>}></Route>
+          {/* <Route path="movies/booking/conformation" element={<Pyment/>} /> */}
+          
           {/* Admin Section */}
           <Route path="/admin">
             
