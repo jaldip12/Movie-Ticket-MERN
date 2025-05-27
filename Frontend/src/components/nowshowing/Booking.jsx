@@ -4,7 +4,6 @@ import axios from "axios";
 import ShowSeatingLayout from "./ShowSeatingLayout";
 
 export default function Booking({ movieTitle = "MovieTitle" }) {
-  const navigate = useNavigate();
   const [shows, setShows] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedShow, setSelectedShow] = useState(null);

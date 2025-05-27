@@ -127,6 +127,7 @@ const ShowSeatingLayout = ({
         selectedSeats,
         totalAmount: calculateTotalAmount(),
         showDetails: {
+          showId,
           theater: seatingLayoutName,
           time: showTime,
           date: showDate,
