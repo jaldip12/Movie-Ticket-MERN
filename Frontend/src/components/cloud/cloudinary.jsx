@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import  { useState, useCallback } from "react";
 import { Cloudinary } from "@cloudinary/url-gen";
 
 const ImageUpload = ({ onImageUpload }) => {
@@ -39,12 +39,12 @@ const ImageUpload = ({ onImageUpload }) => {
     formData.append("file", image);
     formData.append(
       "upload_preset",
-      process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET
+      process.env.VITE_CLOUDINARY_UPLOAD_PRESET
     );
     formData.append("folder", "Movie-Posters");
     try {
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${process.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: "POST", body: formData }
       );
       if (!response.ok) throw new Error("Upload failed");

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 
-export default function Sigup() {
+export default function Signup() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <motion.div 
@@ -59,7 +59,7 @@ export default function Sigup() {
         <div className="text-center mt-6 text-sm text-gray-400">
           Already have an account?{" "}
           <Link 
-            to="/login" 
+            to="/auth/login" 
             className="font-medium text-yellow-500 hover:text-yellow-400 underline transition-colors"
             prefetch={false}
           >

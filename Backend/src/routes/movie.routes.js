@@ -5,7 +5,7 @@ import { isAdmin } from "../utils/helper.js";
 const router = Router();
 
 
-router.post("/addmovie",isAdmin, addmovie);
+router.post("/addmovie", addmovie);
 
 router.get("/getmovies", getmovies);
 
