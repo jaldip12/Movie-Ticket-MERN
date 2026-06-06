@@ -113,6 +113,7 @@ export default function Signup() {
     }
   };
 
+
   return (
     <PageTransition>
       <div className="relative min-h-screen flex items-center justify-center bg-white overflow-hidden px-4 py-12">
@@ -458,7 +459,6 @@ export default function Signup() {
               I already have an account
             </Link>
           </div>
-
           <p className="mt-6 text-center text-xs text-slate-500">
             By continuing, you agree to our Terms & Privacy Policy.
           </p>
