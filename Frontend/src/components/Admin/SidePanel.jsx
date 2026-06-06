@@ -1,129 +1,151 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PiList } from "react-icons/pi";
+import { Menu as PiList, Power as PiPower } from "lucide-react";
 import {
   LayoutGrid,
   Film,
-  Calendar,
   Sofa,
   Ticket,
-  Settings,
+  Building2,
+  MonitorPlay,
+  CalendarCheck,
+  UsersRound,
+  Utensils,
+  Tag,
+  MessageSquare,
+  ScanLine,
+  Megaphone,
+  History,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
+import { Stagger, StaggerItem } from "@/components/ui/Motion";
 
 const NAV_ITEMS = [
-  {
-    icon: <LayoutGrid className="h-5 w-5" />,
-    fillIcon: <LayoutGrid className="h-5 w-5 text-yellow-400" />,
-    label: "Dashboard",
-    path: "/admin",
-  },
-  {
-    icon: <Film className="h-5 w-5" />,
-    fillIcon: <Film className="h-5 w-5 text-yellow-400" />,
-    label: "Movies",
-    path: "/admin/movies",
-  },
-  {
-    icon: <Calendar className="h-5 w-5" />,
-    fillIcon: <Calendar className="h-5 w-5 text-yellow-400" />,
-    label: "Bookings",
-    path: "/admin/bookings",
-  },
-  {
-    icon: <Sofa className="h-5 w-5" />,
-    fillIcon: <Sofa className="h-5 w-5 text-yellow-400" />,
-    label: "Seating",
-    path: "/admin/seating",
-  },
-  {
-    icon: <Ticket className="h-5 w-5" />,
-    fillIcon: <Ticket className="h-5 w-5 text-yellow-400" />,
-    label: "Shows",
-    path: "/admin/shows",
-  },
-  {
-    icon: <Settings className="h-5 w-5" />,
-    fillIcon: <Settings className="h-5 w-5 text-yellow-400" />,
-    label: "Settings",
-    path: "/admin/settings",
-  },
+  { Icon: LayoutGrid, label: "Dashboard", path: "/admin", end: true },
+  { Icon: Film, label: "Movies", path: "/admin/movies" },
+  { Icon: Building2, label: "Cinemas", path: "/admin/cinemas" },
+  { Icon: MonitorPlay, label: "Screens", path: "/admin/screens" },
+  { Icon: Sofa, label: "Seating", path: "/admin/seating" },
+  { Icon: Ticket, label: "Shows", path: "/admin/shows" },
+  { Icon: CalendarCheck, label: "Bookings", path: "/admin/bookings" },
+  { Icon: ScanLine, label: "Validate", path: "/admin/validate" },
+  { Icon: UsersRound, label: "Users", path: "/admin/users" },
+  { Icon: Utensils, label: "F&B Menu", path: "/admin/fnb" },
+  { Icon: Tag, label: "Promo Codes", path: "/admin/coupons" },
+  { Icon: MessageSquare, label: "Reviews", path: "/admin/reviews" },
+  { Icon: Megaphone, label: "Banners", path: "/admin/banners" },
+  { Icon: History, label: "Audit Log", path: "/admin/audit" },
 ];
 
-const SidePanel = () => {
-  const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(true);
-  const [selected, setSelected] = useState(window.location.pathname);
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
-  const handleLogout = () => {
-    // Add any logout logic here (e.g., clearing localStorage, cookies, etc.)
-     // Adjust based on your auth implementation
-    navigate("/login");
+const SidePanel = ({ expanded, onToggle }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Logged out");
+    navigate("/auth/login", { replace: true });
   };
 
   return (
-    <motion.aside
-      initial={{ x: "-100%" }}
-      animate={{ x: "0%" }}
-      transition={{ duration: 0.2, type: "tween" }}
-      className={`bg-gradient-to-b from-gray-900 to-gray-800 shadow-xl h-screen flex flex-col transition-all duration-300 ${
-        expanded ? "w-64" : "w-20"
-      }`}
+    <aside
+      className={`fixed left-0 top-0 z-40 h-screen flex flex-col
+        bg-white border-r border-slate-200
+        shadow-sm transition-[width] duration-300
+        ${expanded ? "w-64" : "w-16"}`}
+      aria-label="Admin navigation"
     >
-      <div className="p-4">
+      {/* Brand + collapse toggle */}
+      <div className="flex items-center gap-3 px-3 py-4 border-b border-slate-200">
         <button
-          className="inline-block rounded-xl hover:bg-gray-700/50 transition p-3"
-          onClick={() => setExpanded((prev) => !prev)}
+          onClick={onToggle}
+          className={`rounded-lg hover:bg-slate-100 transition p-2 shrink-0 text-slate-700 ${FOCUS_RING}`}
+          aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
         >
-          <PiList className="text-[1.6rem] text-gray-300 hover:text-yellow-400" />
+          <PiList className="text-2xl" />
         </button>
-      </div>
-
-      <nav className="p-4 flex-grow">
-        {NAV_ITEMS.map((item) => (
+        {expanded && (
           <Link
-            key={item.label}
-            to={item.path}
-            className={`flex items-center gap-3 p-3 rounded-md transition-all duration-300 ${
-              selected === item.path
-                ? "text-yellow-400 bg-gray-700/50"
-                : "text-gray-300 hover:text-yellow-400 hover:bg-gray-700/50"
-            }`}
-            onClick={() => setSelected(item.path)}
+            to="/admin"
+            className={`flex items-center gap-2 truncate rounded-md ${FOCUS_RING}`}
           >
-            {selected === item.path ? item.fillIcon : item.icon}
-            <span
-              className={`transition-opacity ${
-                expanded ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              {item.label}
+            <div className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-red-700 shadow-sm shrink-0">
+              <Film className="w-4 h-4 text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-base font-semibold tracking-tight text-slate-900 truncate">
+              MovieVista
             </span>
           </Link>
-        ))}
+        )}
+      </div>
+
+      <nav className="flex-1 overflow-y-auto py-3 px-2">
+        <Stagger gap={0.04} className="space-y-1">
+          {NAV_ITEMS.map(({ Icon, label, path, end }) => (
+            <StaggerItem key={path} y={6}>
+              <NavLink
+                to={path}
+                end={end}
+                title={!expanded ? label : undefined}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${FOCUS_RING}
+                  ${
+                    isActive
+                      ? "text-red-600"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  }
+                  ${expanded ? "" : "justify-center"}`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.span
+                        layoutId="admin-sidebar-active"
+                        className="absolute inset-0 rounded-lg bg-red-50"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 32,
+                        }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <Icon className="relative h-5 w-5 shrink-0" />
+                    {expanded && (
+                      <span className="relative text-sm font-medium truncate">
+                        {label}
+                      </span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            </StaggerItem>
+          ))}
+        </Stagger>
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
-        <motion.button
-          whileTap={{ scale: 0.95 }}
+      <div className="px-2 py-3 border-t border-slate-200">
+        <button
           onClick={handleLogout}
-          className={`
-            w-full flex items-center justify-center gap-3 
-            bg-gray-700 text-gray-300 
-            hover:text-yellow-400 hover:bg-gray-600 
-            active:bg-gray-800
-            transition-all duration-300 
-            rounded-md py-2.5
-            relative
-            ${expanded ? "px-4" : "px-2"}
-          `}
+          title={!expanded ? "Logout" : undefined}
+          className={`w-full flex items-center gap-3 rounded-lg py-2.5 px-3
+            bg-slate-50 border border-slate-200 text-slate-700
+            hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600
+            transition-colors ${FOCUS_RING}
+            ${expanded ? "" : "justify-center"}`}
           aria-label="Log out"
         >
-          
-        </motion.button>
+          <PiPower className="text-xl shrink-0" />
+          {expanded && <span className="text-sm font-medium">Logout</span>}
+        </button>
       </div>
-    </motion.aside>
+    </aside>
   );
 };
 

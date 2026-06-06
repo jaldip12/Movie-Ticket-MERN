@@ -1,21 +1,15 @@
-import { ApiError } from "./ApiError.js";
-const isAdmin = (req,res,next) => {
-    // console.log(req.body);
-    
-    if(req.user.role === "admin"){
-        next();
-    }else {
-        return res
-        .status(403)
-        .json(
-            new ApiError(
-            403,
-            "Access denied. Only Admin can access this route.",
-            false
-            )
-        );
-    }
+import { ApiError } from "./apierror.js";
 
+const requireRole = (...allowedRoles) => (req, res, next) => {
+  if (!req.user) {
+    return next(new ApiError(401, "Authentication required"));
+  }
+  if (!allowedRoles.includes(req.user.role)) {
+    return next(new ApiError(403, "Access denied"));
+  }
+  next();
 };
 
-export { isAdmin };
+const isAdmin = requireRole("admin");
+
+export { requireRole, isAdmin };

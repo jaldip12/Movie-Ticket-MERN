@@ -1,92 +1,199 @@
-# 🎬  Theater Management System
+# 🎬 MovieVista — Multi-City Cinema Booking System
 
-## 📋 Overview
-This project is a comprehensive Movie Management System for Cinépolis, featuring a modern and interactive frontend built with React and a robust backend powered by Express.js. It provides a seamless experience for both users and administrators in managing movie bookings, theater operations, and content.
+MovieVista is a full-stack, multi-city cinema booking platform. End users browse showings across cities, pick seats on a real seating plan, and check out their tickets. Admins manage the entire catalogue: cinemas, screens, seating plans, movies, shows, bookings, and users.
 
-## ✨ Features
+---
 
-### 🎭 User Features
-- 🍿 **Movie Browsing**: Users can view currently showing movies with detailed information.
-- 💺 **Seat Selection**: Interactive seating arrangement for movie bookings.
-- 🔐 **User Authentication**: Secure login and signup functionality.
-- 📱 **Responsive Design**: Optimized for various devices and screen sizes.
-- 🎟️ **Ticket Booking**: Easy and quick movie ticket reservation process.
-- 🔔 **Notifications**: Real-time updates on bookings and movie releases.
+## 🛠️ Tech Stack
 
-### 👨‍💼 Admin Features
-- 🎥 **Movie Management**: Add, edit, and remove movies from the system.
-- 🏢 **Theater Management**: Manage theater details and seating layouts.
-- 📊 **Booking Overview**: View and manage user bookings.
-- 👥 **User Management**: Administer user accounts and permissions.
-- 📈 **Analytics Dashboard**: Insights on ticket sales, popular movies, and user engagement.
+**Backend**
+- Express 4 (REST API)
+- MongoDB Atlas via Mongoose 8
+- Cloudflare R2 for object storage (movie posters / uploads) via the AWS S3 SDK
+- JWT cookie auth with role-based access control
+- `cookie-parser`, `cors`, `morgan`, `express-rate-limit`
 
-## 🛠️ Technology Stack
-- 🖥️ **Frontend**: React.js, Framer Motion for animations
-- 🎨 **UI Components**: Custom UI components and Tailwind CSS for styling
-- 🔄 **State Management**: React Hooks and Context API
-- 🖧 **Backend**: Express.js
-- 🗄️ **Database**: MongoDB (NoSQL database for flexible data storage)
-- 🔒 **Authentication**: JWT (JSON Web Tokens)
-- 🚀 **API**: RESTful API design
+**Frontend**
+- Vite + React 18
+- TailwindCSS + shadcn/ui (Radix primitives)
+- framer-motion for transitions
+- `axios` (centralized client at `src/lib/api.js`, `withCredentials` on)
+- `react-hot-toast` for feedback, `react-router-dom` v6
 
-## 🔑 Key Components
+---
 
-### 🏠 Landing Page
-- Showcases featured movies and promotions
-- Provides quick access to movie bookings and user account
+## 🏛️ Architecture
 
-### 🎞️ Now Showing
-- Displays a grid of currently showing movies
-- Each movie card includes poster, rating, and booking option
+Monorepo with two top-level apps:
 
-### 💺 Seating Arrangement
-- Interactive seat selection interface
-- Real-time price calculation based on selected seats
+```
+new folders/
+├── Backend/        # Express API (port 8000)
+│   ├── app.js
+│   ├── index.js
+│   ├── scripts/seed.js
+│   └── src/
+│       ├── controller/
+│       ├── db/
+│       ├── middleware/
+│       ├── models/
+│       ├── routes/
+│       └── utils/    # asyncHandler, ApiError (apierror.js), ApiResponse (apiresponce.js)
+└── Frontend/       # Vite + React (port 5173)
+    └── src/
+        ├── components/
+        ├── pages/
+        ├── lib/api.js
+        └── ...
+```
 
-### 🛠️ Admin Panel
-- Comprehensive dashboard for managing all aspects of the system
-- Includes analytics, movie management, and user data
+### Key entities
 
-## 🚀 Setup and Installation
+- **Cinema** — a venue in a city (name, city, address).
+- **Screen** — a hall inside a cinema, attached to a `SeatingPlan`.
+- **SeatingPlan** (`Seating`) — reusable layout with sections (Platinum / Gold / Silver), rows × columns, prices, unavailable seats.
+- **Movie** — title, poster, genres, languages, rating, certification, flags (`isNowShowing`, `isFeatured`).
+- **Show** — a `Movie` × `Screen` × `date` × `time` instance, tracks `bookedSeats`.
+- **Booking** — a user's confirmed seats on a show, with totals and status.
+- **User** — auth + role (`user` | `admin`).
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/cinepolis-movie-system.git
-   ```
+### Roles
 
-2. Navigate to the project directory:
-   ```
-   cd Frontend
-   cd Backend
-   ```
+- **`user`** — browse movies/shows, pick seats, book tickets, view their own bookings.
+- **`admin`** — full CRUD on cinemas, screens, seating plans, movies, shows, bookings, and users.
 
-3. Install dependencies in both folders:
-   ```
-   npm install 
-   ```
+Role gating is enforced on the backend with `isAuthenticated` + `requireRole("admin")` middlewares.
 
-4. Set up environment variables for Backend:
-   Create a `.env` file in the root directory and add necessary variables (e.g., database connection string, JWT secret).
+---
 
-5. Start the development server for Frontend:
-   ```
-   npm run dev
-   ```
+## 🚀 Setup
 
-6. Start the development server for Backend:
-   ```
-   npm start
-   ```
+### Prerequisites
+- Node.js 18+
+- A MongoDB Atlas connection string (a local Mongo also works)
+- Cloudflare R2 credentials (only needed for poster/image uploads — the app runs without them, you just can't upload through the admin UI)
 
-7. Open your browser and visit `http://localhost:5173` to view the application.
+### 1. Clone
 
+```bash
+git clone <your-repo-url>
+cd "new folders"
+```
+
+### 2. Backend env
+
+Create `Backend/.env` (see `Backend/.env.example` if present):
+
+```env
+PORT=8000
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net
+JWT_SECRET=replace-me-with-a-long-random-string
+CLIENT_URL=http://localhost:5173
+
+# Cloudflare R2 (optional — only for image uploads)
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=
+R2_PUBLIC_BASE_URL=
+```
+
+### 3. Frontend env
+
+Create `Frontend/.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3100/api/v1
+```
+
+### 4. Install + run
+
+```bash
+# Backend
+cd Backend
+npm install
+npm run seed       # one-time: seeds cinemas, screens, seating, movies, shows
+npm start          # http://localhost:3100
+
+# Frontend (new terminal)
+cd Frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+`npm run seed` is idempotent: it skips if `Movie.countDocuments() > 0`. To wipe and reseed (cinemas, screens, seating, movies, shows — users and bookings are preserved):
+
+```bash
+npm run seed:force
+```
+
+---
+
+## 👤 First admin (Atlas-flip)
+
+There is no public "register as admin" endpoint by design. To create the first admin:
+
+1. Sign up through the UI as a normal user.
+2. Open MongoDB Atlas → `ticket-booking` → `users` collection.
+3. Edit your user document and change `role` from `"user"` to `"admin"`.
+4. Log out and log back in. You now see the admin area.
+
+After that, **Phase 6 added an admin Users page**, so you can promote/demote any other user from inside the app — no more Atlas trips.
+
+---
+
+## ✨ Feature highlights
+
+### User side
+- Browse "Now Showing" + "Coming Soon" movies, with featured carousel
+- City picker — see only cinemas/shows in your city
+- Movie detail page with showtimes grouped by cinema and date
+- Interactive seat selection on the actual auditorium layout (Platinum / Gold / Silver)
+- Login / signup with JWT cookies, "My Tickets" page for booking history
+- Toast feedback throughout, mobile-friendly via Tailwind
+
+### Admin side
+- Dashboard + side panel navigation
+- CRUD for: Movies, Cinemas, Screens, Seating Plans, Shows, Bookings, Users
+- Visual seating plan editor (toggle individual seats unavailable)
+- Image uploads through Cloudflare R2 (presigned PUTs)
+- Role management for other users
+
+---
+
+## 🧭 API surface
+
+All routes are mounted under `/api/v1`:
+
+| Tree         | Purpose                                              |
+| ------------ | ---------------------------------------------------- |
+| `/users`     | Signup, login, logout, current user, profile, roles  |
+| `/movies`    | Movie CRUD + listing (now showing, featured)         |
+| `/shows`     | Show CRUD + lookup by movie/cinema/date              |
+| `/cinemas`   | Cinema CRUD, list by city                            |
+| `/screens`   | Screen CRUD, list by cinema                          |
+| `/bookings`  | Create booking, list own / all bookings              |
+| `/seating`   | Seating plan CRUD, fetch layout for a show           |
+| `/uploads`   | Presigned URL generation for R2 uploads              |
+| `/admin`     | Admin-only utilities (analytics, etc.)               |
+
+---
+
+## 🗺️ Project status
+
+- ✅ **Phases 1–7 complete** — auth, models, admin CRUD, public browsing, seat selection, booking flow, payment-stub + confirmation, R2 uploads, polish (centralized API client, error pages, seed script, README).
+- ⏳ **Pending** — real payment gateway integration (Razorpay / Stripe), production deployment (Render / Vercel / Fly).
+
+---
+
+## 🤝 Contributing
+
+PRs welcome. Open an issue first if you're proposing a non-trivial change so we can align on scope.
+
+---
 
 ## 📞 Contact
+
 For any queries or support, please contact:
 
-🎥 Movies Development Team - jaldipvekariya@gmail.com
-
-## 🙏 Acknowledgements
-- React.js community
-- Express.js team
-- All open-source libraries used in this project
+🎥 Movies Development Team — jaldipvekariya@gmail.com

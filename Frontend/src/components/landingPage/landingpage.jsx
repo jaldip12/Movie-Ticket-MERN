@@ -1,188 +1,321 @@
-import React from 'react';
-import { Sliders } from "./sliders";
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Play, Clock, Star, Film } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { HeroSkeleton } from "@/components/ui/Skeleton";
+import { FadeUp } from "@/components/ui/Motion";
+import { easeOutExpo } from "@/lib/motion";
+import { api } from "@/lib/api";
 
-const features = [
-  {
-    icon: PopcornIcon,
-    title: "Gourmet Concessions", 
-    description: "Indulge in premium snacks and artisanal beverages.",
-  },
-  {
-    icon: TvIcon,
-    title: "Cutting-Edge A/V",
-    description: "Immerse yourself in state-of-the-art 4K visuals and Dolby Atmos sound.",
-  },
-  {
-    icon: SofaIcon,
-    title: "Luxurious Comfort",
-    description: "Relax in our plush, ergonomic reclining seats with ample legroom.",
-  },
-  {
-    icon: FilmIcon,
-    title: "Curated Selection",
-    description: "Enjoy a diverse range of critically acclaimed films and exclusive premieres.",
-  },
-];
+function HeroSlide({ movie, onBook, eager }) {
+  const trailerUrl = movie.trailer || movie.trailerUrl || movie.trailerLink;
 
-export function Landingpage() {
+  const openTrailer = (e) => {
+    e.stopPropagation();
+    if (!trailerUrl) return;
+    window.open(trailerUrl, "_blank", "noopener,noreferrer");
+  };
+
+  // Cinematic copy reveal — each child animates with a staggered delay.
+  const copyChild = (i) => ({
+    initial: { opacity: 0, y: 18 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: easeOutExpo, delay: 0.1 + i * 0.08 },
+    },
+  });
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      <main className="flex-1">
-        <div className="container mx-auto py-16 flex items-center justify-center">
-          <Sliders />
-        </div>
-        <section className="py-16 md:py-24 bg-gray-800">
-          <div className="container mx-auto px-4">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold text-center mb-12 text-yellow-400"
-            >
-              Experience the Magic of Cinema
-            </motion.h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: "#4a5568"
-                  }}
-                  className="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg transition duration-300 ease-in-out"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.9, ease: easeOutExpo }}
+      className="absolute inset-0"
+    >
+      <picture>
+        {/* Ken Burns slow zoom — gives the still backdrop a cinematic breath. */}
+        <motion.img
+          src={movie.backdrop || movie.poster}
+          alt={movie.title}
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover will-change-transform"
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{
+            duration: 14,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </picture>
+      {/* Cinema-style overlays */}
+      <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-white/20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/55 to-transparent" />
+
+      <div className="relative h-full container mx-auto px-4 md:px-6 flex items-end md:items-center pb-12 md:pb-0">
+        <FadeUp delay={0.1} className="max-w-2xl">
+          <motion.p
+            {...copyChild(0)}
+            className="text-red-600 text-xs md:text-sm font-semibold tracking-widest uppercase mb-2 md:mb-3"
+          >
+            {movie.isFeatured ? "Featured" : "Now Showing"}
+          </motion.p>
+          <motion.h1
+            {...copyChild(1)}
+            aria-live="polite"
+            className="text-3xl md:text-6xl font-bold tracking-tight text-slate-900 leading-tight mb-3 md:mb-4 drop-shadow-lg"
+          >
+            {movie.title}
+          </motion.h1>
+          <motion.div
+            {...copyChild(2)}
+            className="flex flex-wrap gap-2 mb-3 md:mb-5"
+          >
+            {movie.certification && (
+              <Badge className="bg-red-100 text-red-700 border border-red-200 hover:bg-red-500/20 font-semibold uppercase">
+                {movie.certification}
+              </Badge>
+            )}
+            {movie.duration && (
+              <Badge className="bg-slate-50 text-slate-800 border border-slate-200 hover:bg-slate-100">
+                <Clock className="w-3 h-3 mr-1" />
+                {movie.duration} min
+              </Badge>
+            )}
+            {Array.isArray(movie.languages) && movie.languages.length > 0 && (
+              <Badge className="bg-slate-50 text-slate-800 border border-slate-200 hover:bg-slate-100">
+                {movie.languages.slice(0, 2).join(", ")}
+              </Badge>
+            )}
+            {Array.isArray(movie.genres) &&
+              movie.genres.slice(0, 2).map((g) => (
+                <Badge
+                  key={g}
+                  className="bg-slate-50 text-slate-800 border border-slate-200 hover:bg-slate-100"
                 >
-                  <motion.div
-                    whileHover={{ rotate: 360, scale: 1.2 }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-6"
-                  >
-                    <feature.icon className="h-16 w-16 text-yellow-400" />
-                  </motion.div>
-                  <h3 className="text-2xl font-semibold mb-4 text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-300">{feature.description}</p>
-                </motion.div>
+                  {g}
+                </Badge>
               ))}
-            </div>
+            {movie.rating != null && (
+              <Badge className="bg-amber-50 text-amber-700 border border-amber-400/20 hover:bg-amber-400/15">
+                <Star className="w-3 h-3 mr-1 fill-amber-400 text-amber-600" />
+                {movie.rating}/10
+              </Badge>
+            )}
+          </motion.div>
+          {movie.description && (
+            <motion.p
+              {...copyChild(3)}
+              className="hidden md:block text-slate-700 text-base mb-6 line-clamp-2 max-w-xl"
+            >
+              {movie.description}
+            </motion.p>
+          )}
+          <motion.div {...copyChild(4)} className="flex flex-wrap gap-3">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={() => onBook(movie)}
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold px-6 md:px-8 h-12 rounded-xl shadow-lg transition-all"
+              >
+                <Film className="w-4 h-4 mr-2" />
+                Book Now
+              </Button>
+            </motion.div>
+            {trailerUrl && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <Button
+                  onClick={openTrailer}
+                  variant="outline"
+                  className="bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100 hover:text-slate-900 px-5 md:px-6 h-12 rounded-xl backdrop-blur-sm transition-all"
+                >
+                  <Play className="w-4 h-4 mr-2 fill-current" />
+                  Watch Trailer
+                </Button>
+              </motion.div>
+            )}
+          </motion.div>
+        </FadeUp>
+      </div>
+    </motion.div>
+  );
+}
+
+function HeroCarousel({ movies }) {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
+  const containerRef = useRef(null);
+  const navigate = useNavigate();
+  const total = movies.length;
+
+  const next = useCallback(() => {
+    if (total === 0) return;
+    setIndex((i) => (i + 1) % total);
+  }, [total]);
+
+  const prev = useCallback(() => {
+    if (total === 0) return;
+    setIndex((i) => (i - 1 + total) % total);
+  }, [total]);
+
+  // Pause when offscreen
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (total <= 1) return;
+    if (paused || !inView) return;
+    const id = setInterval(next, 6000);
+    return () => clearInterval(id);
+  }, [next, total, paused, inView]);
+
+  const goToBooking = (movie) => navigate(`/movies/${movie._id}`);
+
+  if (total === 0) return <HeroSkeleton />;
+  const movie = movies[index];
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      className="relative w-full overflow-hidden border-b border-slate-200 bg-white aspect-[16/11] sm:aspect-[16/9] md:aspect-[21/9] md:max-h-[60vh]"
+    >
+      <AnimatePresence mode="sync">
+        <HeroSlide
+          key={movie._id}
+          movie={movie}
+          onBook={goToBooking}
+          eager={index === 0}
+        />
+      </AnimatePresence>
+
+      {total > 1 && (
+        <>
+          <motion.button
+            type="button"
+            onClick={prev}
+            aria-label="Previous"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            className="hidden md:flex absolute top-1/2 left-4 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/80 border border-slate-200 hover:bg-white hover:border-slate-300 text-slate-900 transition-colors backdrop-blur-sm"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={next}
+            aria-label="Next"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            className="hidden md:flex absolute top-1/2 right-4 -translate-y-1/2 items-center justify-center w-11 h-11 rounded-full bg-white/80 border border-slate-200 hover:bg-white hover:border-slate-300 text-slate-900 transition-colors backdrop-blur-sm"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </motion.button>
+          <div className="absolute bottom-3 right-4 md:bottom-5 md:right-8 flex gap-2">
+            {movies.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIndex(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="relative h-1.5 rounded-full overflow-visible"
+                style={{ width: i === index ? 24 : 12 }}
+              >
+                {/* Track */}
+                <span
+                  className={`absolute inset-0 rounded-full transition-colors ${
+                    i === index
+                      ? "bg-transparent"
+                      : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                />
+                {/* Active pill morphs between dots via layoutId */}
+                {i === index && (
+                  <motion.span
+                    layoutId="hero-active-dot"
+                    className="absolute inset-0 rounded-full bg-red-500"
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 30,
+                    }}
+                  />
+                )}
+              </button>
+            ))}
           </div>
-        </section>
-      </main>
+        </>
+      )}
     </div>
   );
 }
 
-function ChevronRightIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
+/**
+ * Home hero — full-bleed auto-rotating carousel of featured movies.
+ * Falls back to nowShowing when no featured exist.
+ */
+export function Landingpage() {
+  const [heroMovies, setHeroMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    const fetchHero = async () => {
+      setLoading(true);
+      try {
+        let list = [];
+        try {
+          const featuredRes = await api.get("/movies?featured=true");
+          if (featuredRes.data?.statusCode === 200) {
+            list = Array.isArray(featuredRes.data.data) ? featuredRes.data.data : [];
+          }
+        } catch {
+          // ignore – fall through to nowShowing fallback
+        }
+        if (list.length === 0) {
+          const fallbackRes = await api.get("/movies?nowShowing=true");
+          if (fallbackRes.data?.statusCode === 200) {
+            list = Array.isArray(fallbackRes.data.data)
+              ? fallbackRes.data.data.slice(0, 5)
+              : [];
+          }
+        }
+        if (alive) setHeroMovies(list.slice(0, 5));
+      } catch (err) {
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+    fetchHero();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return loading ? (
+    <div className="px-0 md:px-0">
+      <HeroSkeleton />
+    </div>
+  ) : (
+    <HeroCarousel movies={heroMovies} />
   );
 }
 
-function FilmIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="18" height="18" x="3" y="3" rx="2" />
-      <path d="M7 3v18" />
-      <path d="M3 7.5h4" />
-      <path d="M3 12h18" />
-      <path d="M3 16.5h4" />
-      <path d="M17 3v18" />
-      <path d="M17 7.5h4" />
-      <path d="M17 16.5h4" />
-    </svg>
-  );
-}
-
-function PopcornIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4" />
-      <path d="M10 22 9 8" />
-      <path d="m14 22 1-14" />
-      <path d="M20 8c.5 0 .9.4.8 1l-2.6 12c-.1.5-.7 1-1.2 1H7c-.6 0-1.1-.4-1.2-1L3.2 9c-.1-.6.3-1 .8-1Z" />
-    </svg>
-  );
-}
-
-function SofaIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3" />
-      <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z" />
-      <path d="M4 18v2" />
-      <path d="M20 18v2" />
-      <path d="M12 4v9" />
-    </svg>
-  );
-}
-
-function TvIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="20" height="15" x="2" y="7" rx="2" ry="2" />
-      <polyline points="17 2 12 7 7 2" />
-    </svg>
-  );
-}
+export default Landingpage;

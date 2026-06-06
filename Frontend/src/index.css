@@ -1,34 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
   :root {
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%
-  }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Light theme — clean white surfaces */
+    --background: 0 0% 100%;            /* pure white */
+    --foreground: 222 47% 11%;          /* near-black slate */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Brand red — kept across themes */
+    --primary: 0 72% 51%;               /* red-600 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;           /* slate-100 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;    /* slate-500 */
+
+    --accent: 0 72% 51%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;              /* slate-200 */
+    --input: 214 32% 91%;
+    --ring: 0 72% 51%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar (light) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 0 72% 51%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 0 72% 51%;
+  }
+
+  /* Keep .dark as an alias of root so anything looking for .dark still works */
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 30% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 30% 12%;
+    --muted-foreground: 215 16% 62%;
+    --accent: 0 72% 51%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 30% 16%;
+    --input: 222 30% 16%;
+    --ring: 0 72% 51%;
   }
 }
+
 @layer base {
   * {
     @apply border-border;
   }
-  body {
+
+  html, body, #root {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+  }
+
+  body {
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
   }
 }
-

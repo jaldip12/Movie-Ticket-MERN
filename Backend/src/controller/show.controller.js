@@ -1,159 +1,225 @@
 import mongoose from "mongoose";
 import Show from "../models/show.model.js";
+import Movie from "../models/movie.model.js";
+import Screen from "../models/screen.model.js";
+import Cinema from "../models/cinema.model.js";
 import { asyncHandler } from "../utils/asynchandler.js";
 import { ApiResponse } from "../utils/apiresponce.js";
+import { ApiError } from "../utils/apierror.js";
+
+const SHOW_POPULATE = [
+  { path: "movieId", select: "title poster duration certification" },
+  {
+    path: "screenId",
+    populate: [
+      { path: "cinemaId", select: "name city" },
+      { path: "seatingPlanId", select: "name" },
+    ],
+  },
+];
 
 const createShow = asyncHandler(async (req, res) => {
-    const { movieName, date, time, seatingLayoutName } = req.body;
+  const { movieId, screenId, date, time, format, language, subtitles } = req.body;
 
-    if (!movieName || !date || !time || !seatingLayoutName) {
-        throw new ApiResponse(400, "","All fields are required");
-        
-        
-    }
-
-    const show = await Show.create({
-        movieName,
-        date,
-        time,
-        seatingLayoutName
-    });
-
-    return res.status(201).json(
-        new ApiResponse(201, show, "Show created successfully")
-    );
-});
-
-const getShows = asyncHandler(async (req, res) => {
-    const shows = await Show.find();
-    
-    
-    return res.status(200).json(
-        new ApiResponse(200, shows, "Shows fetched successfully")
-    );
-});
-
-const getShowsByMovie = asyncHandler(async (req, res) => {
-    const { title } = req.query;
-    
-    if (!title?.trim()) {
-        throw new ApiResponse(400,"", "Movie title is required");
-    }
-
-    const shows = await Show.find({
-        movieName: { 
-            $regex: title.trim(),
-            $options: 'i'
-        }
-    }).sort({ date: 1 });
-   
-    if (!shows?.length) {
-        throw new ApiResponse(404, "",`No shows found for movie: ${title}`);
-    }
-
-    return res.status(200).json(
-        new ApiResponse(200, shows, "Shows fetched successfully")
-    );
-});
- 
-const bookSeats = asyncHandler(async (req, res) => {
-  const { showId, seats } = req.body;
-  console.log("Booking request:", req.body);
-  console.log("Show ID:", showId);
-  // Input validation
-  if (!showId || !Array.isArray(seats) || seats.length === 0) {
-    return res.status(400).json({ success: false, message: "showId and seats are required" });
+  if (!movieId || !screenId || !date || !time) {
+    throw new ApiError(400, "movieId, screenId, date and time are required");
   }
 
-  
-  // Format seats into "A5", "B10" etc.
-  let formattedSeats;
-  try {
-    formattedSeats = seats.map(seat => {
-      if (typeof seat === "object" && seat.row && seat.number) {
-        return `${seat.row}${seat.number}`;
-      } else if (typeof seat === "string") {
-        return seat.trim();
-      } else {
-        throw new Error("Invalid seat format");
-      }
-    });
-  } catch (err) {
-    return res.status(400).json({ success: false, message: err.message });
+  if (!mongoose.isValidObjectId(movieId)) {
+    throw new ApiError(400, "Invalid movieId");
   }
 
-  // Start MongoDB transaction
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const show = await Show.findById(showId).session(session);
-    if (!show) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ success: false, message: "Show not found" });
-    }
-
-    // Check for already booked seats
-    const alreadyBooked = formattedSeats.filter(seat => show.bookedSeats.includes(seat));
-    const newSeats = formattedSeats.filter(seat => !show.bookedSeats.includes(seat));
-
-    if (alreadyBooked.length > 0) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(409).json({
-        success: false,
-        message: `Some seats are already booked: ${alreadyBooked.join(", ")}`,
-        alreadyBooked,
-      });
-    }
-
-    // Add only new unbooked seats
-    show.bookedSeats.push(...newSeats);
-    await show.save({ session });
-
-    await session.commitTransaction();
-    session.endSession();
-
-    return res.status(200).json({
-      success: true,
-      message: "Seats booked successfully",
-      bookedSeats: show.bookedSeats,
-    });
-  } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Booking error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Error booking seats. Please try again.",
-    });
+  if (!mongoose.isValidObjectId(screenId)) {
+    throw new ApiError(400, "Invalid screenId");
   }
+
+  const movie = await Movie.findById(movieId);
+  if (!movie || !movie.isActive) {
+    throw new ApiError(400, "Movie not found or inactive");
+  }
+
+  const screen = await Screen.findById(screenId);
+  if (!screen || !screen.isActive) {
+    throw new ApiError(400, "Screen not found or inactive");
+  }
+
+  const show = await Show.create({
+    movieId,
+    screenId,
+    date,
+    time,
+    ...(format !== undefined && { format }),
+    ...(language !== undefined && { language }),
+    ...(subtitles !== undefined && { subtitles }),
+  });
+
+  const populated = await Show.findById(show._id).populate(SHOW_POPULATE);
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, populated, "Show created successfully"));
 });
 
-export default bookSeats;
+const listShows = asyncHandler(async (req, res) => {
+  const { movieId, city, date, cinemaId } = req.query;
 
-const getBookedSeats = asyncHandler(async (req, res) => {
-    const { showId } = req.params;
+  const filter = { isActive: true };
 
-    if (!showId) {
-        throw new ApiResponse(400, "", "Show ID is required");
+  if (movieId) {
+    if (!mongoose.isValidObjectId(movieId)) {
+      throw new ApiError(400, "Invalid movieId");
     }
+    filter.movieId = movieId;
+  }
 
-    const show = await Show.findById(showId);
-    if (!show) {
-        throw new ApiResponse(404, "", "Show not found");
+  if (date) {
+    const dayStart = new Date(date);
+    if (Number.isNaN(dayStart.getTime())) {
+      throw new ApiError(400, "Invalid date");
     }
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    filter.date = { $gte: dayStart, $lt: dayEnd };
+  }
 
-    return res.status(200).json(
-        new ApiResponse(200, show.bookedSeats, "Booked seats fetched successfully")
-    );
+  let cinemaIds = null;
+
+  if (city) {
+    const cinemas = await Cinema.find({ city, isActive: true }).select("_id");
+    cinemaIds = cinemas.map((c) => c._id);
+  }
+
+  if (cinemaId) {
+    if (!mongoose.isValidObjectId(cinemaId)) {
+      throw new ApiError(400, "Invalid cinemaId");
+    }
+    if (cinemaIds) {
+      cinemaIds = cinemaIds.filter((id) => id.toString() === cinemaId);
+    } else {
+      cinemaIds = [cinemaId];
+    }
+  }
+
+  if (cinemaIds) {
+    if (cinemaIds.length === 0) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, [], "Shows fetched successfully"));
+    }
+    const screens = await Screen.find({
+      cinemaId: { $in: cinemaIds },
+      isActive: true,
+    }).select("_id");
+    const screenIds = screens.map((s) => s._id);
+    if (screenIds.length === 0) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, [], "Shows fetched successfully"));
+    }
+    filter.screenId = { $in: screenIds };
+  }
+
+  const shows = await Show.find(filter)
+    .sort({ date: 1, time: 1 })
+    .populate(SHOW_POPULATE);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, shows, "Shows fetched successfully"));
 });
 
-export {
-    createShow,
-    getShows,
-    getShowsByMovie,
-    bookSeats,
-    getBookedSeats
-};
+const getShow = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.isValidObjectId(id)) {
+    throw new ApiError(400, "Invalid show id");
+  }
+
+  const show = await Show.findById(id).populate(SHOW_POPULATE);
+
+  if (!show || !show.isActive) {
+    throw new ApiError(404, "Show not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, show, "Show fetched successfully"));
+});
+
+const updateShow = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.isValidObjectId(id)) {
+    throw new ApiError(400, "Invalid show id");
+  }
+
+  const { movieId, screenId, date, time, isActive, format, language, subtitles } = req.body;
+  const update = {};
+
+  if (movieId !== undefined) {
+    if (!mongoose.isValidObjectId(movieId)) {
+      throw new ApiError(400, "Invalid movieId");
+    }
+    const movie = await Movie.findById(movieId);
+    if (!movie || !movie.isActive) {
+      throw new ApiError(400, "Movie not found or inactive");
+    }
+    update.movieId = movieId;
+  }
+
+  if (screenId !== undefined) {
+    if (!mongoose.isValidObjectId(screenId)) {
+      throw new ApiError(400, "Invalid screenId");
+    }
+    const screen = await Screen.findById(screenId);
+    if (!screen || !screen.isActive) {
+      throw new ApiError(400, "Screen not found or inactive");
+    }
+    update.screenId = screenId;
+  }
+
+  if (date !== undefined) update.date = date;
+  if (time !== undefined) update.time = time;
+  if (isActive !== undefined) update.isActive = isActive;
+  if (format !== undefined) update.format = format;
+  if (language !== undefined) update.language = language;
+  if (subtitles !== undefined) update.subtitles = subtitles;
+
+  const show = await Show.findByIdAndUpdate(id, update, {
+    new: true,
+    runValidators: true,
+  }).populate(SHOW_POPULATE);
+
+  if (!show) {
+    throw new ApiError(404, "Show not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, show, "Show updated successfully"));
+});
+
+const deleteShow = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.isValidObjectId(id)) {
+    throw new ApiError(400, "Invalid show id");
+  }
+
+  const show = await Show.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { new: true }
+  );
+
+  if (!show) {
+    throw new ApiError(404, "Show not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { _id: show._id }, "Show deleted successfully"));
+});
+
+export { createShow, listShows, getShow, updateShow, deleteShow };

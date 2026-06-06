@@ -1,18 +1,18 @@
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/apierror.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+
 export const isAuthenticated = async (req, res, next) => {
-  
-  try {  
+  try {
     const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+      req.cookies?.token ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json(new ApiError(401, "Missing token"));
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    // console.log(decodedToken)
 
     const user = await User.findById(decodedToken?.userId).select(
       "-password -refreshToken"
@@ -23,8 +23,9 @@ export const isAuthenticated = async (req, res, next) => {
     }
     req.user = user;
     next();
-  } catch (error) {
-    console.log(error)
+  } catch {
+    // Don't log the JWT error — it can leak token contents into server logs
+    // and an unauthenticated request isn't actionable for ops.
     return res.status(401).json(new ApiError(401, "Unauthorized request"));
   }
 };

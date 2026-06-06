@@ -1,73 +1,263 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Play, ArrowLeft, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
-import Booking from "./Booking.jsx";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { api } from "@/lib/api";
+import ReviewSection from "@/components/reviews/ReviewSection";
+import MovieHero from "@/components/movie/MovieHero";
+import ShowtimesList from "@/components/movie/ShowtimesList";
+import RelatedMovies from "@/components/movie/RelatedMovies";
+import StickyBookBar from "@/components/movie/StickyBookBar";
+
+function MovieDetailsSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="relative h-[40vh] md:h-[55vh] overflow-hidden">
+        <Skeleton className="absolute inset-0 rounded-none" />
+      </div>
+      <div className="container mx-auto px-4 -mt-24 md:-mt-40 relative z-10">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+          <Skeleton className="w-40 md:w-64 aspect-[2/3] rounded-2xl shrink-0" />
+          <div className="flex-1 space-y-4 pt-4 md:pt-24">
+            <Skeleton className="h-10 w-2/3" />
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-12 w-40 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Synopsis with a "Read more" expand-toggle and a soft fade after ~4 lines
+ * when collapsed.
+ */
+function Synopsis({ description }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!description) return null;
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.4 }}
+      className="relative z-10 container mx-auto px-4 mt-6 md:mt-10 max-w-4xl"
+    >
+      <h2 className="text-lg md:text-xl font-semibold tracking-tight text-slate-900 mb-3">
+        Synopsis
+      </h2>
+      <div className="relative">
+        <p
+          className={`text-slate-700 text-sm md:text-base leading-relaxed whitespace-pre-line ${
+            expanded ? "" : "line-clamp-4"
+          }`}
+        >
+          {description}
+        </p>
+        {!expanded && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-50 to-transparent" />
+        )}
+      </div>
+      {description.length > 240 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-2 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </motion.section>
+  );
+}
+
+function AboutMovie({ movie }) {
+  const hasCast = Array.isArray(movie.cast) && movie.cast.length > 0;
+  const hasDirector = !!movie.director;
+  const hasGenres = Array.isArray(movie.genres) && movie.genres.length > 0;
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.4 }}
+      className="relative z-10 container mx-auto px-4 mt-8 md:mt-12 max-w-6xl"
+    >
+      <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-slate-900 mb-4">
+        About this movie
+      </h2>
+
+      {!hasCast && !hasDirector ? (
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white backdrop-blur-sm p-5 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+                Cast
+              </h3>
+              <p className="text-slate-700 text-sm">
+                Cast & crew coming soon.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+                Director
+              </h3>
+              <p className="text-slate-700 text-sm">
+                Director info coming soon.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+                Tags
+              </h3>
+              {hasGenres ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {movie.genres.map((g) => (
+                    <span
+                      key={g}
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                    >
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-700 text-sm">—</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white backdrop-blur-sm p-5 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+              Cast
+            </h3>
+            <p className="text-slate-700 text-sm">
+              {hasCast ? movie.cast.join(", ") : "—"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+              Director
+            </h3>
+            <p className="text-slate-700 text-sm">
+              {hasDirector ? movie.director : "—"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
+              Tags
+            </h3>
+            {hasGenres ? (
+              <div className="flex flex-wrap gap-1.5">
+                {movie.genres.map((g) => (
+                  <span
+                    key={g}
+                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-700 text-sm">—</p>
+            )}
+          </div>
+        </div>
+      )}
+    </motion.section>
+  );
+}
 
 export default function MovieDetailsPage() {
   const navigate = useNavigate();
   const { movieId } = useParams();
   const [movie, setMovie] = useState(null);
-  const [showTrailer, setShowTrailer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-
+  const [formats, setFormats] = useState([]);
 
   useEffect(() => {
+    let alive = true;
     const fetchMovie = async () => {
       try {
         setLoading(true);
-        const movieResponse = await axios.get(
-          `http://localhost:8000/api/v1/movies/getmoviebyid/${movieId}`
-        );
-  
-        if (movieResponse.data?.statusCode === 200 && movieResponse.data?.data) {
+        setError(null);
+        const res = await api.get(`/movies/${movieId}`);
+        if (!alive) return;
+        if (res.data?.statusCode === 200 && res.data?.data) {
+          const m = res.data.data;
           const movieData = {
-            id: movieResponse.data.data?._id || movieId,
-            title: movieResponse.data.data?.title || 'Unknown Title',
-            poster: movieResponse.data.data?.poster || '',
-            duration: movieResponse.data.data?.duration || 'N/A',
-            certification: movieResponse.data.data?.certification || 'N/A',
-            genre: movieResponse.data.data?.genre || 'N/A',
-            releaseDate: movieResponse.data.data?.releaseDate || new Date().toISOString(),
-            languages: movieResponse.data.data?.languages || [],
-            description: movieResponse.data.data?.description || 'No description available',
-            trailerUrl: movieResponse.data.data?.trailerUrl || ''
+            id: m?._id || movieId,
+            title: m?.title || "Unknown Title",
+            poster: m?.poster || "",
+            duration: m?.duration ?? null,
+            certification: m?.certification || "N/A",
+            genres: Array.isArray(m?.genres) ? m.genres : [],
+            releaseDate: m?.releaseDate || null,
+            languages: Array.isArray(m?.languages) ? m.languages : [],
+            language: m?.language || "",
+            description: m?.description || "No description available",
+            trailerUrl: m?.trailerUrl || "",
+            rating: m?.rating ?? null,
+            votes: m?.votes ?? 0,
+            cast: Array.isArray(m?.cast) ? m.cast : [],
+            director: m?.director || "",
           };
           setMovie(movieData);
-          document.title = `${movieData.title} - Cinema Booking`;
+          document.title = `${movieData.title} - MovieVista`;
         } else {
           throw new Error("Movie not found");
         }
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        setError(error.response?.data?.message || "Failed to load movie details.");
+      } catch (err) {
+        if (alive) {
+          setError(
+            err.response?.data?.message || "Failed to load movie details."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (alive) setLoading(false);
       }
     };
-  
-    if (movieId) {
-      fetchMovie();
-    }
+
+    if (movieId) fetchMovie();
+    return () => {
+      alive = false;
+    };
   }, [movieId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-        <div className="animate-pulse">Loading movie details...</div>
-      </div>
-    );
-  }
+  const scrollToShowtimes = useCallback(() => {
+    document
+      .getElementById("showtimes")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const handleFormatsChange = useCallback((next) => {
+    setFormats(next);
+  }, []);
+
+  if (loading) return <MovieDetailsSkeleton />;
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white gap-4">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-slate-900 gap-4 px-4 text-center">
         <div className="text-xl">{error}</div>
-        <Button variant="outline" className="text-white border-white" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2" /> Go Back
+        <Button
+          onClick={() => navigate(-1)}
+          className="h-11 bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 hover:border-slate-300 rounded-xl transition-colors"
+        >
+          <ArrowLeft className="mr-2 w-4 h-4" /> Go Back
         </Button>
       </div>
     );
@@ -75,100 +265,48 @@ export default function MovieDetailsPage() {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white gap-4">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-slate-900 gap-4 px-4 text-center">
         <div className="text-xl">Movie not found</div>
-        <Button variant="outline" className="text-white border-white" onClick={() => navigate('/movies')}>
-          <ArrowLeft className="mr-2" /> Browse Movies
+        <Button
+          onClick={() => navigate("/movies")}
+          className="h-11 bg-slate-50 border border-slate-200 text-slate-800 hover:bg-slate-100 hover:border-slate-300 rounded-xl transition-colors"
+        >
+          <ArrowLeft className="mr-2 w-4 h-4" /> Browse Movies
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="p-4 flex items-center">
-        <Button variant="ghost" className="text-white" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2" /> Back
-        </Button>
+    <div className="relative min-h-screen bg-white pb-32 md:pb-0 overflow-hidden">
+      {/* Decorative red glows */}
+      <div className="pointer-events-none absolute inset-0 -z-0">
+        <div className="absolute -top-40 -left-32 h-[500px] w-[500px] rounded-full bg-red-600/15 blur-3xl" />
+        <div className="absolute top-1/4 -right-40 h-[500px] w-[500px] rounded-full bg-rose-700/10 blur-3xl" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="w-full md:w-1/3">
-            <img
-              src={movie.poster || '/placeholder-poster.jpg'}
-              alt={movie.title}
-              className="w-full rounded-lg shadow-xl"
-            />
-            {movie.trailerUrl && (
-              <Button
-                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => setShowTrailer(true)}
-              >
-                <Play className="w-5 h-5 mr-2" /> WATCH TRAILER
-              </Button>
-            )}
-          </div>
+      <MovieHero
+        movie={movie}
+        formats={formats}
+        onBookClick={scrollToShowtimes}
+      />
 
-          <div className="w-full md:w-2/3 text-white">
-            <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <span className="px-2 py-1 bg-gray-800 rounded text-sm">{movie.duration}</span>
-              <span className="px-2 py-1 bg-gray-800 rounded text-sm">{movie.certification}</span>
-              <span className="px-2 py-1 bg-gray-800 rounded text-sm">{movie.genre}</span>
-            </div>
+      <Synopsis description={movie.description} />
 
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400">Release Date:</span>
-                <span>{new Date(movie.releaseDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400">Languages:</span>
-                <span>{Array.isArray(movie.languages) ? movie.languages.join(", ") : 'N/A'}</span>
-              </div>
-            </div>
+      <ShowtimesList
+        movieId={movie.id}
+        onFormatsChange={handleFormatsChange}
+      />
 
-            <p className="text-gray-300 mb-8">{movie.description}</p>
+      <AboutMovie movie={movie} />
 
-            {/* Add Book Now Button */}
-            <Button
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg text-lg font-semibold"
-              onClick={() => {
-                const bookingSection = document.querySelector('#booking-section');
-                bookingSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Book Now
-            </Button>
-          </div>
-        </div>
-
-        {/* Show Timings Component */}
-        <div id="booking-section" className="mt-16 mb-8">
-          <Booking movieTitle={movie.title} />
-        </div>
-
-        {/* Trailer Modal */}
-        {showTrailer && movie.trailerUrl && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-            <Button
-              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white"
-              onClick={() => setShowTrailer(false)}
-            >
-              <X className="w-6 h-6" />
-            </Button>
-            <div className="w-full max-w-4xl aspect-video bg-gray-800">
-              <iframe
-                src={movie.trailerUrl}
-                className="w-full h-full"
-                title={`${movie.title} Trailer`}
-                allowFullScreen
-              />
-            </div>
-          </div>
-        )}
+      <div className="relative z-10">
+        <ReviewSection movieId={movie.id} />
       </div>
+
+      <RelatedMovies currentMovieId={movie.id} genres={movie.genres} />
+
+      <StickyBookBar onClick={scrollToShowtimes} />
     </div>
   );
 }

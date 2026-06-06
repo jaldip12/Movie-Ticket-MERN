@@ -1,111 +1,122 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { CreditCard } from "lucide-react";
 
 const Pyment = () => {
   const [paymentData, setPaymentData] = useState({
-    cardNumber: '',
-    cardHolder: '',
-    expiry: '',
-    cvv: '',
+    cardNumber: "",
+    cardHolder: "",
+    expiry: "",
+    cvv: "",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add payment processing logic here
-    console.log('Payment submitted:', paymentData);
+    // Real payment integration is added in a later phase (Razorpay).
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPaymentData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setPaymentData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const fieldClass =
+    "w-full h-11 px-3 rounded-md bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-500 focus-visible:outline-none focus-visible:border-red-500 focus-visible:ring-2 focus-visible:ring-red-500/20 transition-colors";
+
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="relative px-4 py-10 bg-white mx-8 md:mx-0 shadow rounded-3xl sm:p-10">
-          <div className="max-w-md mx-auto">
-            <div className="flex items-center space-x-5">
-              <div className="h-14 w-14 bg-blue-500 rounded-full flex flex-shrink-0 justify-center items-center text-white text-2xl font-mono">
-                💳
+    <div className="min-h-screen bg-white py-12 px-4 flex items-start justify-center">
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white backdrop-blur-sm shadow-xl p-7 md:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="grid place-items-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 shadow-lg">
+              <CreditCard className="w-5 h-5 text-slate-900" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Payment Details
+              </h2>
+              <p className="text-xs text-slate-400">
+                Demo form — real payment lands in the next phase.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-800">
+                Card Number
+              </label>
+              <input
+                type="text"
+                name="cardNumber"
+                placeholder="1234 5678 9012 3456"
+                maxLength="16"
+                value={paymentData.cardNumber}
+                onChange={handleInputChange}
+                className={fieldClass}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium text-slate-800">
+                Card Holder Name
+              </label>
+              <input
+                type="text"
+                name="cardHolder"
+                placeholder="John Doe"
+                value={paymentData.cardHolder}
+                onChange={handleInputChange}
+                className={fieldClass}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-slate-800">
+                  Expiry
+                </label>
+                <input
+                  type="text"
+                  name="expiry"
+                  placeholder="MM/YY"
+                  maxLength="5"
+                  value={paymentData.expiry}
+                  onChange={handleInputChange}
+                  className={fieldClass}
+                  required
+                />
               </div>
-              <div className="block pl-2 font-semibold text-xl text-gray-700">
-                <h2 className="leading-relaxed">Payment Details</h2>
+              <div>
+                <label className="block mb-2 text-sm font-medium text-slate-800">
+                  CVV
+                </label>
+                <input
+                  type="password"
+                  name="cvv"
+                  placeholder="123"
+                  maxLength="3"
+                  value={paymentData.cvv}
+                  onChange={handleInputChange}
+                  className={fieldClass}
+                  required
+                />
               </div>
             </div>
 
-            <form className="divide-y divide-gray-200" onSubmit={handleSubmit}>
-              <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                <div className="flex flex-col">
-                  <label className="leading-loose">Card Number</label>
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    className="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none"
-                    placeholder="1234 5678 9012 3456"
-                    maxLength="16"
-                    value={paymentData.cardNumber}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="leading-loose">Card Holder Name</label>
-                  <input
-                    type="text"
-                    name="cardHolder"
-                    className="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none"
-                    placeholder="John Doe"
-                    value={paymentData.cardHolder}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:space-x-4">
-                  <div className="flex-1">
-                    <label className="leading-loose">Expiry Date</label>
-                    <input
-                      type="text"
-                      name="expiry"
-                      className="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none"
-                      placeholder="MM/YY"
-                      maxLength="5"
-                      value={paymentData.expiry}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="leading-loose">CVV</label>
-                    <input
-                      type="text"
-                      name="cvv"
-                      className="px-4 py-2 border focus:ring-blue-500 focus:border-blue-500 w-full sm:text-sm border-gray-300 rounded-md focus:outline-none"
-                      placeholder="123"
-                      maxLength="3"
-                      value={paymentData.cvv}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-4 flex items-center space-x-4">
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Pay Now
-                </button>
-              </div>
-            </form>
-          </div>
+            <button
+              type="submit"
+              className="w-full h-11 mt-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg transition-all"
+            >
+              Pay Now
+            </button>
+          </form>
         </div>
+
+        <p className="mt-6 text-center text-xs text-slate-500">
+          Your card details are not stored. PCI-DSS compliant payment goes live with Razorpay.
+        </p>
       </div>
     </div>
   );

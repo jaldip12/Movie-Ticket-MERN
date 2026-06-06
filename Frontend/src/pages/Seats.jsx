@@ -1,5 +1,5 @@
 import React from 'react'
-import Seating from "../components/seatingCreation/Seating"
+import Seating from "../components/seatingCreation/seating";
 
 function Seats() {
   return (
